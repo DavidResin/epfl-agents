@@ -1,9 +1,7 @@
 import java.awt.Color;
 import java.util.ArrayList;
 
-import uchicago.src.sim.analysis.BinDataSource;
 import uchicago.src.sim.analysis.DataSource;
-import uchicago.src.sim.analysis.OpenHistogram;
 import uchicago.src.sim.analysis.OpenSequenceGraph;
 import uchicago.src.sim.analysis.Sequence;
 import uchicago.src.sim.engine.BasicAction;
@@ -29,7 +27,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 		private static final int GRIDSIZE = 20;
 		private static final int NUMINITRABBITS = 10;
 		private static final int NUMINITGRASS = 10;
-		private static final int GRASSGROWTHRATE = 5;
+		private static final int GRASSGROWTHRATE = 50;
 		private static final int BIRTHTHRESHOLD = 300;
 		private static final int ENERGYFACTOR = 1;
 		private static final int LIFESPAN = 40;
@@ -46,8 +44,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 		private RabbitsGrassSimulationSpace rgsSpace;
 		private DisplaySurface displaySurf;
 		private ArrayList<RabbitsGrassSimulationAgent> agentList;
-		private OpenSequenceGraph amountOfGrassInSpace;
-		private OpenHistogram agentEnergyDistribution;
+		private OpenSequenceGraph amounts;
 
 		class grassInSpace implements DataSource, Sequence {
 			public Object execute() {
@@ -59,10 +56,13 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 			}
 		}
 		
-		class agentEnergy implements BinDataSource {
-			public double getBinValue(Object o) {
-				RabbitsGrassSimulationAgent rgsa = (RabbitsGrassSimulationAgent) o;
-				return rgsa.getEnergy();
+		class rabbitsInSpace implements DataSource, Sequence {
+			public Object execute() {
+				return getSValue();
+			}
+			
+			public double getSValue() {
+				return (double) agentList.size();
 			}
 		}
 		
@@ -107,8 +107,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 						rgsa.step();
 					}
 					
-					int deadAgents = reapDeadAgents();
-					
+					reapDeadAgents();
 					displaySurf.updateDisplay();
 				}
 			}
@@ -125,7 +124,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 			
 			class RabbitsGrassSimulationUpdateGrassInSpace extends BasicAction {
 				public void execute() {
-					amountOfGrassInSpace.step();
+					amounts.step();
 				}
 			}
 			
@@ -174,7 +173,9 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 			displaySurf.addDisplayableProbeable(displayGrass, "Grass");
 			displaySurf.addDisplayableProbeable(displayAgents, "Agents");
 			
-			amountOfGrassInSpace.addSequence("Grass In Space",  new grassInSpace());
+			amounts.addSequence("Grass In Space",  new grassInSpace());
+			amounts.addSequence("Rabbits in space", new rabbitsInSpace());
+			
 		}
 		
 		private void addNewAgent() {
@@ -220,8 +221,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 			buildDisplay();
 			
 			displaySurf.display();
-			amountOfGrassInSpace.display();
-			agentEnergyDistribution.display();
+			amounts.display();
 		}
 
 		public String[] getInitParam() {
@@ -271,6 +271,22 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 			this.birthThreshold = birthThreshold;
 		}
 		
+		public int getLifespan() {
+			return lifespan;
+		}
+		
+		public void setLifespan(int lifespan) {
+			this.lifespan = lifespan;
+		}
+		
+		public int getEnergyFactor() {
+			return energyFactor;
+		}
+		
+		public void setEnergyFactor(int energyFactor) {
+			this.energyFactor = energyFactor;
+		}
+		
 		public String getName() {
 			return "Rabbit Grass Simulator Model";
 		}
@@ -292,10 +308,9 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 			String windowName = "Rabbits Grass Simulation Model Window 1";
 			displaySurf = null;
 			displaySurf = new DisplaySurface(this, windowName);
-			amountOfGrassInSpace = new OpenSequenceGraph("Amount of Grass In Space", this);
-			agentEnergyDistribution = new OpenHistogram("Agent Energy", 8, 0);
+			amounts = new OpenSequenceGraph("Amount of Grass and Rabbits In Space", this);
 			
 			registerDisplaySurface(windowName, displaySurf);
-			this.registerMediaProducer("Plot", amountOfGrassInSpace);
+			this.registerMediaProducer("Plot", amounts);
 		}
 }

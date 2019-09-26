@@ -90,11 +90,8 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 		
 		if (tryMove(newX, newY))
 			energy += rgsSpace.takeGrassAt(x, y);
-		else {
-			RabbitsGrassSimulationAgent rgsa = rgsSpace.getAgentAt(newX, newY);
-			setVxVy();
-		}
 
+		setVxVy();
 		energy--;
 	}
 	

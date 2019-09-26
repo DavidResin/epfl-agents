@@ -35,12 +35,10 @@ public class RabbitsGrassSimulationSpace {
 	public int getGrassAt(int x, int y) {
 		int i;
 		
-		if (rgsSpace.getObjectAt(x, y) != null) {
+		if (rgsSpace.getObjectAt(x, y) != null)
 			i = ((Integer) rgsSpace.getObjectAt(x, y)).intValue();
-		}
-		else {
+		else
 			i = 0;
-		}
 		
 		return i;
 	}
@@ -48,9 +46,8 @@ public class RabbitsGrassSimulationSpace {
 	public RabbitsGrassSimulationAgent getAgentAt(int x, int y) {
 		RabbitsGrassSimulationAgent retVal = null;
 		
-		if (agentSpace.getObjectAt(x, y) != null) {
+		if (agentSpace.getObjectAt(x, y) != null)
 			retVal = (RabbitsGrassSimulationAgent) agentSpace.getObjectAt(x, y);
-		}
 		
 		return retVal;
 	}
