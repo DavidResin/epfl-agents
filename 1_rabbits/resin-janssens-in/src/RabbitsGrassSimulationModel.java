@@ -28,17 +28,19 @@ import uchicago.src.sim.util.SimUtilities;
 public class RabbitsGrassSimulationModel extends SimModelImpl {
 		private static final int GRIDSIZE = 20;
 		private static final int NUMINITRABBITS = 10;
-		private static final int NUMINITGRASS = 200;
-		private static final int GRASSGROWTHRATE = 4;
+		private static final int NUMINITGRASS = 10;
+		private static final int GRASSGROWTHRATE = 5;
 		private static final int BIRTHTHRESHOLD = 300;
-		private static final int ENERGY_OUTPUT = 1;
+		private static final int ENERGYFACTOR = 1;
+		private static final int LIFESPAN = 40;
 				
 		private int gridSize = GRIDSIZE;
 		private int numInitRabbits = NUMINITRABBITS;
 		private int numInitGrass = NUMINITGRASS;
 		private int grassGrowthRate = GRASSGROWTHRATE;
 		private int birthThreshold = BIRTHTHRESHOLD;
-		private int energyOutput = ENERGY_OUTPUT;
+		private int energyFactor = ENERGYFACTOR;
+		private int lifespan = LIFESPAN;
 		
 		private Schedule schedule;
 		private RabbitsGrassSimulationSpace rgsSpace;
@@ -80,7 +82,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 		
 		public void buildModel() {
 			System.out.println("Running BuildModel");
-			rgsSpace = new RabbitsGrassSimulationSpace(gridSize);
+			rgsSpace = new RabbitsGrassSimulationSpace(gridSize, energyFactor);
 			rgsSpace.spreadGrass(numInitGrass);
 			
 			for (int i = 0; i < numInitRabbits; i++) {
@@ -176,7 +178,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 		}
 		
 		private void addNewAgent() {
-			RabbitsGrassSimulationAgent a = new RabbitsGrassSimulationAgent(energyOutput);
+			RabbitsGrassSimulationAgent a = new RabbitsGrassSimulationAgent(lifespan);
 			agentList.add(a);
 			rgsSpace.addAgent(a);
 		}
@@ -225,7 +227,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 		public String[] getInitParam() {
 			// Parameters to be set by users via the Repast UI slider bar
 			// Do "not" modify the parameters names provided in the skeleton code, you can add more if you want 
-			String[] params = { "GridSize", "NumInitRabbits", "NumInitGrass", "GrassGrowthRate", "BirthThreshold", "AgentMinLifespan", "AgentMaxLifespan", "EnergyOutput" };
+			String[] params = { "GridSize", "NumInitRabbits", "NumInitGrass", "GrassGrowthRate", "BirthThreshold", "EnergyFactor", "Lifespan" };
 			return params;
 		}
 

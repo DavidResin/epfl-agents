@@ -8,10 +8,12 @@ import uchicago.src.sim.space.Object2DGrid;
 public class RabbitsGrassSimulationSpace {
 	private Object2DGrid rgsSpace;
 	private Object2DGrid agentSpace;
+	private int energyFactor;
 	
-	public RabbitsGrassSimulationSpace(int gridSize) {
+	public RabbitsGrassSimulationSpace(int gridSize, int energyFactor) {
 		rgsSpace = new Object2DGrid(gridSize, gridSize);
 		agentSpace = new Object2DGrid(gridSize, gridSize);
+		this.energyFactor = energyFactor;
 		
 		for (int i = 0; i < gridSize; i++) {
 			for (int j = 0; j < gridSize; j++) {

@@ -18,15 +18,14 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 	private int vY;
 	private int energy;
 	private static int IDNumber = 0;
-	private int energyOutput;
 	private int ID;
 	private RabbitsGrassSimulationSpace rgsSpace;
 	
-	public RabbitsGrassSimulationAgent(int energyOutput) {
+	public RabbitsGrassSimulationAgent(int lifespan) {
 		x = -1;
 		y = -1;
+		energy = lifespan;
 		setVxVy();
-		this.energyOutput = energyOutput;
 		IDNumber++;
 		ID = IDNumber;
 	}
@@ -35,7 +34,7 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 		vX = 0;
 		vY = 0;
 		
-		while (vX == 0 && vY == 0) {
+		while (!(vX == 0 ^ vY == 0)) {
 			vX = (int) Math.floor(Math.random() * 3) - 1;
 			vY = (int) Math.floor(Math.random() * 3) - 1;
 		}
@@ -93,14 +92,10 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 			energy += rgsSpace.takeGrassAt(x, y);
 		else {
 			RabbitsGrassSimulationAgent rgsa = rgsSpace.getAgentAt(newX, newY);
-			
-			if (rgsa != null && energy > 0) {
-				rgsa.receiveEnergy(energyOutput);
-				energy--;
-			}
-			
 			setVxVy();
 		}
+
+		energy--;
 	}
 	
 	private boolean tryMove(int newX, int newY) {
