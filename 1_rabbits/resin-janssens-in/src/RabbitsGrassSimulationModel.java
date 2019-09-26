@@ -107,10 +107,6 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 					
 					int deadAgents = reapDeadAgents();
 					
-					for (int i = 0; i < deadAgents; i++) {
-						addNewAgent();
-					}
-					
 					displaySurf.updateDisplay();
 				}
 			}
