@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+<fullyQualifiedTypeName name="uchicago.src.sim.gui.Object2DDisplay"/>
+<fullyQualifiedTypeName name="java.awt.Color"/>
+<fullyQualifiedTypeName name="uchicago.src.sim.engine.BasicAction"/>
+<fullyQualifiedTypeName name="uchicago.src.sim.util.SimUtilities"/>
+<fullyQualifiedTypeName name="RabbitsGrassSimulationAgent"/>
+<fullyQualifiedTypeName name="RabbitsGrassSimulationStep"/>
+<fullyQualifiedTypeName name="uchicago.src.sim.event.SliderListener"/>
+</qualifiedTypeNameHistroy>
