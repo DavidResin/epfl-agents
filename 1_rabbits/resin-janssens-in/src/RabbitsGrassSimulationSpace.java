@@ -40,7 +40,7 @@ public class RabbitsGrassSimulationSpace {
 		else
 			i = 0;
 		
-		return i;
+		return i * energyFactor;
 	}
 	
 	public RabbitsGrassSimulationAgent getAgentAt(int x, int y) {
