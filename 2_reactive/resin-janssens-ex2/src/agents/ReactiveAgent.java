@@ -12,6 +12,8 @@ import logist.task.Task;
 import logist.task.TaskDistribution;
 import logist.topology.Topology;
 import logist.topology.Topology.City;
+import datatypes.MyAction;
+import datatypes.MyState;
 
 public class ReactiveAgent implements ReactiveBehavior {
 
@@ -19,6 +21,7 @@ public class ReactiveAgent implements ReactiveBehavior {
 	private double pPickup;
 	private int numActions;
 	private Agent myAgent;
+	private TaskDistribution td;
 
 	@Override
 	public void setup(Topology topology, TaskDistribution td, Agent agent) {
@@ -32,6 +35,7 @@ public class ReactiveAgent implements ReactiveBehavior {
 		this.pPickup = discount;
 		this.numActions = 0;
 		this.myAgent = agent;
+		this.td = td;
 	}
 
 	@Override
@@ -51,5 +55,30 @@ public class ReactiveAgent implements ReactiveBehavior {
 		numActions++;
 		
 		return action;
+	}
+	
+	private double getReward(MyState state, MyAction action) {
+		Vehicle vehicle = myAgent.vehicles().iterator().next();
+		double reward = -vehicle.costPerKm();
+		
+		if (state.hasTask())
+			reward *= state.getDistance();
+		else
+			reward *= getAvgDistance(state.getCitySrc()); 
+			
+		if (state.hasTask() && action == MyAction.TAKE)
+			reward += td.reward(state.getCitySrc(), state.getCityDst());
+		
+		return reward;
+	}
+	
+	private double getAvgDistance(City citySrc) {
+		double sum = 0;
+		Vehicle vehicle = myAgent.vehicles().iterator().next();
+		
+		for (City cityDst : citySrc.neighbors())
+			sum += citySrc.distanceTo(cityDst);
+		
+		return sum / citySrc.neighbors().size();
 	}
 }
