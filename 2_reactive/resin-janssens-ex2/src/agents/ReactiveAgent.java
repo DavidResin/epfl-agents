@@ -46,7 +46,7 @@ public class ReactiveAgent implements ReactiveBehavior {
 	
 	public void reinforcementLearningAlgorithm(double discount) {		
 		// Boolean to indicate whether the last iteration of the RLA has changed V
-		boolean improvement = true;
+		boolean better = true;
 		
 		V = new HashMap<MyState, Double>();
 		Best = new HashMap<MyState, MyAction>();
@@ -54,8 +54,8 @@ public class ReactiveAgent implements ReactiveBehavior {
 		for (MyState state : MyState.getAllStates())
 			V.put(state, 0.0);
 		
-		while (improvement) {
-			improvement = false;
+		while (better) {
+			better = false;
 			
 			for (MyState currState : MyState.getAllStates()) {
 				HashMap<MyAction, Double> Q = new HashMap<MyAction, Double>();
@@ -73,7 +73,7 @@ public class ReactiveAgent implements ReactiveBehavior {
 					
 					if (V.get(currState) == null || value > V.get(currState)) {
 						// Make the improvement flag true since V has been updated
-						improvement = true;
+						better = true;
 						V.put(currState, value);
 						Best.put(currState, action);
 					}
@@ -85,11 +85,10 @@ public class ReactiveAgent implements ReactiveBehavior {
 	@Override
 	public Action act(Vehicle vehicle, Task availableTask) {
 		Action action;
-		MyState state = MyState.find(vehicle.getCurrentCity(), availableTask == null ? vehicle.getCurrentCity() : availableTask.deliveryCity);
-		System.out.println(V.get(state));
-		if (Best.get(state) == MyAction.SKIP) {
+		MyState state = new MyState(vehicle.getCurrentCity(), availableTask == null ? null : availableTask.deliveryCity);
+		
+		if (Best.get(state) == MyAction.TAKE) {
 			City currentCity = vehicle.getCurrentCity();
-			System.out.println(state + ": SKIP");
 			action = new Move(currentCity.randomNeighbor(random));
 		}
 		else
