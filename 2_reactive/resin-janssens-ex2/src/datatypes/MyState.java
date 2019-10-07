@@ -12,10 +12,7 @@ public class MyState {
 	public static void setStates(List<City> cities) {
 		for (City citySrc : cities) {
 			for (City cityDst : cities) {
-				if (cityDst == citySrc)
-					states.add(new MyState(citySrc, null));
-				else
-					states.add(new MyState(citySrc, cityDst));
+				states.add(new MyState(citySrc, cityDst));
 			}
 		}
 	}
@@ -34,7 +31,7 @@ public class MyState {
 	}
 	
 	public Boolean hasTask() {
-		return cityDst != null;
+		return citySrc != cityDst;
 	}
 	
 	public double getDistance() {
