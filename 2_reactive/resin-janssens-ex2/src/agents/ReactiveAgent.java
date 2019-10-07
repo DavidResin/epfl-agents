@@ -64,7 +64,6 @@ public class ReactiveAgent implements ReactiveBehavior {
 			improvement = false;
 			for(MyState state : MyState.getAllStates()){
 				HashMap<MyAction, Double> Q = new HashMap<MyAction, Double>();
-				
 				for(MyAction action : MyAction.values()){
 					double value = getReward(state, action);
 					for(MyState stateAfterTransition : MyState.getAllStates()){
@@ -89,12 +88,14 @@ public class ReactiveAgent implements ReactiveBehavior {
 	@Override
 	public Action act(Vehicle vehicle, Task availableTask) {
 		Action action;
-		MyState state = new MyState(vehicle.getCurrentCity(), availableTask == null ? null : availableTask.deliveryCity);
-		
-		if (Best.get(state) == MyAction.TAKE) {
+		MyState state = MyState.find(vehicle.getCurrentCity(), availableTask == null ? vehicle.getCurrentCity() : availableTask.deliveryCity);
+		System.out.println(V.get(state));
+		if (Best.get(state) == MyAction.SKIP) {
 			City currentCity = vehicle.getCurrentCity();
+			System.out.println(state + ": SKIP");
 			action = new Move(currentCity.randomNeighbor(random));
 		} else {
+			System.out.println(state + ": TAKE");
 			action = new Pickup(availableTask);
 		}
 		

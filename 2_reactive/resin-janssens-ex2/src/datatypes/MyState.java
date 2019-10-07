@@ -45,4 +45,13 @@ public class MyState {
 	public String toString(){
 		return citySrc + "-" + cityDst;
 	}
+	
+	public static MyState find(City citySrc, City cityDst){
+		for(MyState state : states){
+			if(state.getCitySrc() == citySrc && state.getCityDst() == cityDst){
+				return state;
+			}
+		}
+		return null;
+	}
 }
