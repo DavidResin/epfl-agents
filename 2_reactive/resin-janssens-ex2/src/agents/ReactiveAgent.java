@@ -24,6 +24,8 @@ public class ReactiveAgent implements ReactiveBehavior {
 	private Agent myAgent;
 	private TaskDistribution td;
 	private Topology topology;
+	private HashMap<MyState, Double> V;
+	private HashMap<MyState, MyAction> Best;
 
 	@Override
 	public void setup(Topology topology, TaskDistribution td, Agent agent) {
@@ -39,14 +41,24 @@ public class ReactiveAgent implements ReactiveBehavior {
 		this.myAgent = agent;
 		this.td = td;
 		this.topology = topology;
+		
+		MyState.setStates(topology.cities());
+		
+		reinforcementLearningAlgorithm(discount);
+		
+		printV();
 	}
 	
-	public void reinforcementLearningAlgorithm(TaskDistribution td, double discount){
-		HashMap<MyState, MyAction> Best = new HashMap<MyState, MyAction>();
-		HashMap<MyState, Double> V = new HashMap<MyState, Double>();
-		
+	public void reinforcementLearningAlgorithm(double discount){		
 		// Boolean to indicate whether the last iteration of the RLA has changed V
 		boolean improvement = true;
+		
+		V = new HashMap<MyState, Double>();
+		Best = new HashMap<MyState, MyAction>();
+		
+		for(MyState state : MyState.getAllStates()){
+			V.put(state, 0.0);
+		}
 		
 		while(improvement){
 			improvement = false;
@@ -54,9 +66,11 @@ public class ReactiveAgent implements ReactiveBehavior {
 				HashMap<MyAction, Double> Q = new HashMap<MyAction, Double>();
 				
 				for(MyAction action : MyAction.values()){
-					double value = 0.0; // change to reward
+					double value = getReward(state, action);
 					for(MyState stateAfterTransition : MyState.getAllStates()){
-						value += 0;
+						double transProb = getTransProb(state, action, stateAfterTransition);
+						double nextValue = V.get(stateAfterTransition);
+						value += discount * transProb * nextValue;
 					}
 					Q.put(action, value);
 					
@@ -75,8 +89,9 @@ public class ReactiveAgent implements ReactiveBehavior {
 	@Override
 	public Action act(Vehicle vehicle, Task availableTask) {
 		Action action;
-
-		if (availableTask == null || random.nextDouble() > pPickup) {
+		MyState state = new MyState(vehicle.getCurrentCity(), availableTask == null ? null : availableTask.deliveryCity);
+		
+		if (Best.get(state) == MyAction.TAKE) {
 			City currentCity = vehicle.getCurrentCity();
 			action = new Move(currentCity.randomNeighbor(random));
 		} else {
@@ -89,6 +104,12 @@ public class ReactiveAgent implements ReactiveBehavior {
 		numActions++;
 		
 		return action;
+	}
+	
+	private void printV(){
+		for(MyState state : MyState.getAllStates()){
+			System.out.println(state + ": " + Best.get(state) + ", " + V.get(state));
+		}
 	}
 	
 	private double getReward(MyState state, MyAction action) {

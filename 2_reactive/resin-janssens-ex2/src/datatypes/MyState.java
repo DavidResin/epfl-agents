@@ -44,4 +44,8 @@ public class MyState {
 	public double getDistance() {
 		return citySrc.distanceTo(cityDst);
 	}
+	
+	public String toString(){
+		return citySrc + "-" + cityDst;
+	}
 }
