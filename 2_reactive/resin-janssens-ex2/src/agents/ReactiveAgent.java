@@ -84,19 +84,23 @@ public class ReactiveAgent implements ReactiveBehavior {
 
 	@Override
 	public Action act(Vehicle vehicle, Task availableTask) {
+		double numSkippedActions = 0.0;
 		Action action;
 		MyState state = MyState.find(vehicle.getCurrentCity(), availableTask == null ? vehicle.getCurrentCity() : availableTask.deliveryCity);
 		System.out.println(V.get(state));
 		if (Best.get(state) == MyAction.SKIP) {
 			City currentCity = vehicle.getCurrentCity();
 			System.out.println(state + ": SKIP");
+			numSkippedActions += 1;
 			action = new Move(currentCity.randomNeighbor(random));
 		}
 		else
 			action = new Pickup(availableTask);
 		
-		if (numActions >= 1)
+		if (numActions >= 1){
 			System.out.println("The total profit after " + numActions + " actions is " + myAgent.getTotalProfit() + " (average profit: " + (myAgent.getTotalProfit() / (double)numActions) + ")");
+			System.out.println("Skipped rate: " + numSkippedActions/numActions);
+		}
 		
 		numActions++;
 		return action;
