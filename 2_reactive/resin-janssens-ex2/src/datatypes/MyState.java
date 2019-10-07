@@ -20,6 +20,10 @@ public class MyState {
 		}
 	}
 	
+	public static List<MyState> getAllStates(){
+		return states;
+	}
+	
 	public MyState(City citySrc, City cityDst) {
 		this.citySrc = citySrc;
 		this.cityDst = cityDst;
