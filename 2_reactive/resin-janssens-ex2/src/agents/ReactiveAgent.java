@@ -85,10 +85,11 @@ public class ReactiveAgent implements ReactiveBehavior {
 	@Override
 	public Action act(Vehicle vehicle, Task availableTask) {
 		Action action;
-		MyState state = new MyState(vehicle.getCurrentCity(), availableTask == null ? null : availableTask.deliveryCity);
-		
-		if (Best.get(state) == MyAction.TAKE) {
+		MyState state = MyState.find(vehicle.getCurrentCity(), availableTask == null ? vehicle.getCurrentCity() : availableTask.deliveryCity);
+		System.out.println(V.get(state));
+		if (Best.get(state) == MyAction.SKIP) {
 			City currentCity = vehicle.getCurrentCity();
+			System.out.println(state + ": SKIP");
 			action = new Move(currentCity.randomNeighbor(random));
 		}
 		else
