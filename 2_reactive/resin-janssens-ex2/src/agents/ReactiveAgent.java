@@ -23,6 +23,7 @@ public class ReactiveAgent implements ReactiveBehavior {
 	private int numActions;
 	private Agent myAgent;
 	private TaskDistribution td;
+	private Topology topology;
 
 	@Override
 	public void setup(Topology topology, TaskDistribution td, Agent agent) {
@@ -37,6 +38,7 @@ public class ReactiveAgent implements ReactiveBehavior {
 		this.numActions = 0;
 		this.myAgent = agent;
 		this.td = td;
+		this.topology = topology;
 	}
 	
 	public void reinforcementLearningAlgorithm(TaskDistribution td, double discount){
@@ -106,11 +108,40 @@ public class ReactiveAgent implements ReactiveBehavior {
 	
 	private double getAvgDistance(City citySrc) {
 		double sum = 0;
-		Vehicle vehicle = myAgent.vehicles().iterator().next();
 		
 		for (City cityDst : citySrc.neighbors())
 			sum += citySrc.distanceTo(cityDst);
 		
 		return sum / citySrc.neighbors().size();
+	}
+	
+	private double getTransProb(MyState currState, MyAction action, MyState nextState) {
+		City step1 = currState.getCityDst();
+		City step2 = nextState.getCityDst();
+		
+		if (step1 != nextState.getCitySrc())
+			return 0d;
+		
+		if (action == MyAction.TAKE) {
+			if (nextState.hasTask())
+				return td.probability(step1, step2);
+			else 
+				return getEmptyProb(step1);
+		}
+		else {
+			if (step1.neighbors().contains(step2))
+				return 1d / step1.neighbors().size();
+			else
+				return 0d;
+		}
+	}
+	
+	private double getEmptyProb(City citySrc) {
+		double sum = 0;
+		
+		for (City cityDst : topology.cities())
+			sum += td.probability(citySrc, cityDst);
+		
+		return 1 - sum;
 	}
 }
