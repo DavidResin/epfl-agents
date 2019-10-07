@@ -98,7 +98,8 @@ public class ReactiveAgent implements ReactiveBehavior {
 			action = new Pickup(availableTask);
 		
 		if (numActions >= 1){
-			System.out.println("The total profit after " + numActions + " actions is " + myAgent.getTotalProfit() + " (average profit: " + (myAgent.getTotalProfit() / (double)numActions) + ")");
+			System.out.println("The total profit after " + numActions + " actions is " + myAgent.getTotalProfit() + " (average profit: " + (myAgent.getTotalProfit() / (double)numActions) + ") HI");
+			System.out.println("test");
 			System.out.println("Skipped rate: " + numSkippedActions/numActions);
 		}
 		
