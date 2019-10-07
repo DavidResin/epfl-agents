@@ -19,7 +19,6 @@ import datatypes.MyState;
 public class ReactiveAgent implements ReactiveBehavior {
 
 	private Random random;
-	private double pPickup;
 	private int numActions;
 	private Agent myAgent;
 	private TaskDistribution td;
@@ -32,53 +31,51 @@ public class ReactiveAgent implements ReactiveBehavior {
 
 		// Reads the discount factor from the agents.xml file.
 		// If the property is not present it defaults to 0.95
-		Double discount = agent.readProperty("discount-factor", Double.class,
-				0.95);
+		Double discount = agent.readProperty("discount-factor", Double.class, 0.95);
 
 		this.random = new Random();
-		this.pPickup = discount;
 		this.numActions = 0;
 		this.myAgent = agent;
 		this.td = td;
 		this.topology = topology;
 		
 		MyState.setStates(topology.cities());
-		
 		reinforcementLearningAlgorithm(discount);
-		
 		printV();
 	}
 	
-	public void reinforcementLearningAlgorithm(double discount){		
+	public void reinforcementLearningAlgorithm(double discount) {		
 		// Boolean to indicate whether the last iteration of the RLA has changed V
 		boolean improvement = true;
 		
 		V = new HashMap<MyState, Double>();
 		Best = new HashMap<MyState, MyAction>();
 		
-		for(MyState state : MyState.getAllStates()){
+		for (MyState state : MyState.getAllStates())
 			V.put(state, 0.0);
-		}
 		
-		while(improvement){
+		while (improvement) {
 			improvement = false;
-			for(MyState state : MyState.getAllStates()){
+			
+			for (MyState currState : MyState.getAllStates()) {
 				HashMap<MyAction, Double> Q = new HashMap<MyAction, Double>();
-				for(MyAction action : MyAction.values()){
-					double value = getReward(state, action);
-					for(MyState stateAfterTransition : MyState.getAllStates()){
-						double transProb = getTransProb(state, action, stateAfterTransition);
-						double nextValue = V.get(stateAfterTransition);
+				
+				for (MyAction action : MyAction.values()) {
+					double value = getReward(currState, action);
+					
+					for (MyState nextState : MyState.getAllStates()) {
+						double transProb = getTransProb(currState, action, nextState);
+						double nextValue = V.get(nextState);
 						value += discount * transProb * nextValue;
 					}
+					
 					Q.put(action, value);
 					
-					if(V.get(state) == null || value > V.get(state)){
-						V.put(state, value);
-						Best.put(state, action);
-						
+					if (V.get(currState) == null || value > V.get(currState)) {
 						// Make the improvement flag true since V has been updated
 						improvement = true;
+						V.put(currState, value);
+						Best.put(currState, action);
 					}
 				}
 			}
@@ -94,25 +91,23 @@ public class ReactiveAgent implements ReactiveBehavior {
 			City currentCity = vehicle.getCurrentCity();
 			System.out.println(state + ": SKIP");
 			action = new Move(currentCity.randomNeighbor(random));
-		} else {
-			System.out.println(state + ": TAKE");
+		}
+		else
 			action = new Pickup(availableTask);
-		}
 		
-		if (numActions >= 1) {
-			System.out.println("The total profit after "+numActions+" actions is "+myAgent.getTotalProfit()+" (average profit: "+(myAgent.getTotalProfit() / (double)numActions)+")");
-		}
+		if (numActions >= 1)
+			System.out.println("The total profit after " + numActions + " actions is " + myAgent.getTotalProfit() + " (average profit: " + (myAgent.getTotalProfit() / (double)numActions) + ")");
+		
 		numActions++;
-		
 		return action;
 	}
 	
-	private void printV(){
-		for(MyState state : MyState.getAllStates()){
+	private void printV() {
+		for (MyState state : MyState.getAllStates())
 			System.out.println(state + ": " + Best.get(state) + ", " + V.get(state));
-		}
 	}
 	
+	// Reward table
 	private double getReward(MyState state, MyAction action) {
 		Vehicle vehicle = myAgent.vehicles().iterator().next();
 		double reward = -vehicle.costPerKm();
@@ -127,7 +122,8 @@ public class ReactiveAgent implements ReactiveBehavior {
 		
 		return reward;
 	}
-	
+
+	// Average distance to neighbor cities, only used by the reward table
 	private double getAvgDistance(City citySrc) {
 		double sum = 0;
 		
@@ -137,6 +133,7 @@ public class ReactiveAgent implements ReactiveBehavior {
 		return sum / citySrc.neighbors().size();
 	}
 	
+	// Transition table
 	private double getTransProb(MyState currState, MyAction action, MyState nextState) {
 		City step1 = currState.getCityDst();
 		City step2 = nextState.getCityDst();
@@ -158,6 +155,7 @@ public class ReactiveAgent implements ReactiveBehavior {
 		}
 	}
 	
+	// Probability of no task available, only used by the transition table
 	private double getEmptyProb(City citySrc) {
 		double sum = 0;
 		
