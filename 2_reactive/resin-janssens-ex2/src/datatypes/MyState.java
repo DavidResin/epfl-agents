@@ -10,9 +10,11 @@ public class MyState {
 	private static List<MyState> states = new ArrayList<MyState>();
 	
 	public static void setStates(List<City> cities) {
-		for (City citySrc : cities) {
-			for (City cityDst : cities) {
-				states.add(new MyState(citySrc, cityDst));
+		if(states.size() == 0){
+			for (City citySrc : cities) {
+				for (City cityDst : cities) {
+					states.add(new MyState(citySrc, cityDst));
+				}
 			}
 		}
 	}

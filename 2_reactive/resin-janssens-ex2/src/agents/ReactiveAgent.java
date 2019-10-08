@@ -25,6 +25,7 @@ public class ReactiveAgent implements ReactiveBehavior {
 	private Topology topology;
 	private HashMap<MyState, Double> V;
 	private HashMap<MyState, MyAction> Best;
+	private double numSkippedActions = 0.0;
 
 	@Override
 	public void setup(Topology topology, TaskDistribution td, Agent agent) {
@@ -40,6 +41,8 @@ public class ReactiveAgent implements ReactiveBehavior {
 		this.topology = topology;
 		
 		MyState.setStates(topology.cities());
+		System.out.println("=====" + agent.name() + "=====");
+		printV();
 		reinforcementLearningAlgorithm(discount);
 		printV();
 	}
@@ -54,7 +57,10 @@ public class ReactiveAgent implements ReactiveBehavior {
 		for (MyState state : MyState.getAllStates())
 			V.put(state, 0.0);
 		
+		int run = 0;
+		
 		while (improvement) {
+			run++;
 			improvement = false;
 			
 			for (MyState currState : MyState.getAllStates()) {
@@ -84,7 +90,6 @@ public class ReactiveAgent implements ReactiveBehavior {
 
 	@Override
 	public Action act(Vehicle vehicle, Task availableTask) {
-		double numSkippedActions = 0.0;
 		Action action;
 		MyState state = MyState.find(vehicle.getCurrentCity(), availableTask == null ? vehicle.getCurrentCity() : availableTask.deliveryCity);
 		System.out.println(V.get(state));
@@ -94,13 +99,14 @@ public class ReactiveAgent implements ReactiveBehavior {
 			numSkippedActions += 1;
 			action = new Move(currentCity.randomNeighbor(random));
 		}
-		else
+		else{
 			action = new Pickup(availableTask);
+			System.out.println(state + ": SKIP");
+		}
 		
 		if (numActions >= 1){
-			System.out.println("The total profit after " + numActions + " actions is " + myAgent.getTotalProfit() + " (average profit: " + (myAgent.getTotalProfit() / (double)numActions) + ") HI");
-			System.out.println("test");
-			System.out.println("Skipped rate: " + numSkippedActions/numActions);
+			System.out.println("The total profit after " + numActions + " actions is " + myAgent.getTotalProfit() + " (average profit: " + (myAgent.getTotalProfit() / (double)numActions) + ")");
+			System.out.println("Skipped rate: " + numSkippedActions/numActions + "total number of skipped actions: " + numSkippedActions);
 		}
 		
 		numActions++;
@@ -108,6 +114,10 @@ public class ReactiveAgent implements ReactiveBehavior {
 	}
 	
 	private void printV() {
+		if(V == null){
+			System.out.println("NULL");
+			return;
+		}
 		for (MyState state : MyState.getAllStates())
 			System.out.println(state + ": " + Best.get(state) + ", " + V.get(state));
 	}
