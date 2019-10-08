@@ -42,10 +42,7 @@ public class ReactiveAgent implements ReactiveBehavior {
 		this.topology = topology;
 		
 		MyState.setStates(topology.cities());
-		System.out.println("=====" + agent.name() + "=====");
-		printV();
 		reinforcementLearningAlgorithm(discount);
-		printV();
 	}
 	
 	public void reinforcementLearningAlgorithm(double discount) {		
