@@ -26,6 +26,7 @@ public class ReactiveAgent implements ReactiveBehavior {
 	private double numSkippedActions = 0.0;
 	private Map<MyState, Double> V;
 	private Map<MyState, MyAction> Best;
+	private double dF;
 
 	@Override
 	public void setup(Topology topology, TaskDistribution td, Agent agent) {
@@ -38,6 +39,7 @@ public class ReactiveAgent implements ReactiveBehavior {
 		this.numActions = 0;
 		this.myAgent = agent;
 		this.td = td;
+		this.dF = discount;
 		
 		MyState.setStates(topology.cities());
 		reinforcementLearningAlgorithm(discount);
@@ -108,7 +110,7 @@ public class ReactiveAgent implements ReactiveBehavior {
 		}
 		
 		if (numActions >= 1){
-			System.out.println("The total profit after " + numActions + " actions is " + myAgent.getTotalProfit() + " (average profit: " + (myAgent.getTotalProfit() / (double)numActions) + ")");
+			System.out.println("The total profit for factor " + dF + " after " + numActions + " actions is " + myAgent.getTotalProfit() + " (average profit: " + (myAgent.getTotalProfit() / (double)numActions) + ")");
 			System.out.println("Skipped rate: " + numSkippedActions/numActions + "total number of skipped actions: " + numSkippedActions);
 		}
 		
