@@ -162,32 +162,27 @@ public class ReactiveAgent implements ReactiveBehavior {
 		City cityB2 = nextState.getCityDst();
 		
 		if (action == MyAction.SKIP) {
-			if (cityA1.hasNeighbor(cityB1)) {
-				// Probability that the agent is in city B1, which is a neighbour of city A1, while there is a task present to city B2, after SKIPping from city A1
-				if (nextState.hasTask())
-					return (1.0 / cityA1.neighbors().size()) * td.probability(cityB1, cityB2);
-				// Probability that the agent is in city B1, which is a neighbour of city A1, while there is no task present, after SKIPping from city A1
-				else 
-					return (1.0 / cityA1.neighbors().size()) * td.probability(cityB1, null);
-			}
 			// Probability that the agent is in city B1, which is NOT a neighbour of city A1, after SKIPping from city A1
-			else return 0d;
+			if (!cityA1.hasNeighbor(cityB1))
+				return 0d;
+			// Probability that the agent is in city B1, which is a neighbour of city A1, while there is a task present to city B2, after SKIPping from city A1
+			else if (nextState.hasTask())
+				return (1.0 / cityA1.neighbors().size()) * td.probability(cityB1, cityB2);
+			// Probability that the agent is in city B1, which is a neighbour of city A1, while there is no task present, after SKIPping from city A1
+			else 
+				return (1.0 / cityA1.neighbors().size()) * td.probability(cityB1, null);
 		}
 		else {
-			if (currState.hasTask()) {
-				if (cityB1 == cityA2) {
-					// Probability that the agent is in city B1, the destination of the task in city A1, while there is a task present to city B2, after TAKEing the task in city A1
-					if (nextState.hasTask())
-						return td.probability(cityB1, cityB2);
-					// Probability that the agent is in city B1, the destination of the task in city A1, while there is no task present, after TAKEing the task in city A1
-					else
-						return td.probability(cityB1, null);
-				}
-				// Probability that the agent is in city B1, which is NOT the destination of the task in city A1, after TAKEing the task in city A1
-				else return 0d;
-			}
-			// Probability that the agent is anywhere after TAKEing a task in city A1, while there was no task there
-			else return 0d;
+			// Probability that the agent is anywhere after TAKEing a task in city A1, while there was no task there OR
+			// Probability that the agent is in city B1, which is NOT the destination of the task in city A1, after TAKEing the task in city A1
+			if (!currState.hasTask() || cityB1 != cityA2)
+				return 0d;
+			// Probability that the agent is in city B1, the destination of the task in city A1, while there is a task present to city B2, after TAKEing the task in city A1
+			else if (nextState.hasTask())
+				return td.probability(cityB1, cityB2);
+			// Probability that the agent is in city B1, the destination of the task in city A1, while there is no task present, after TAKEing the task in city A1
+			else
+				return td.probability(cityB1, null);
 		}
 	}
 	

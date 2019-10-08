@@ -69,7 +69,7 @@
 				<set home="Monaco" />
 				<set speed="220" />
 				<set capacity="30" />
-				<set cost-per-km="5" />
+				<set cost-per-km="50" />
 			</vehicle>
 		</company>
 		
@@ -80,7 +80,7 @@
 				<set home="Strasbourg" />
 				<set speed="220" />
 				<set capacity="80" />
-				<set cost-per-km="5" />
+				<set cost-per-km="50" />
 			</vehicle>
 		</company>
 		
