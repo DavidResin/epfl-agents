@@ -74,13 +74,17 @@ public class ReactiveAgent implements ReactiveBehavior {
 					
 					for (MyState nextState : MyState.getAllStates()) {
 						double transProb = getTransProb(currState, action, nextState);
-						double nextValue = nextV.get(nextState);
+						double nextValue = currV.get(nextState);
 						value += discount * transProb * nextValue;
 					}
-					
+
 					Q.put(action, value);
-					nextV.put(currState, value);
-					Best.put(currState, action);
+					
+					if(nextV.get(currState) == 0.0 || value > nextV.get(currState)){
+						nextV.put(currState, value);
+						Best.put(currState, action);
+					}
+					
 				}
 			}
 			
