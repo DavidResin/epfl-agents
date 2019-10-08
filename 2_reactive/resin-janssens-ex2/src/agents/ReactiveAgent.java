@@ -165,10 +165,10 @@ public class ReactiveAgent implements ReactiveBehavior {
 			if(cityA1.hasNeighbor(cityB1)){
 				if(nextState.hasTask()){
 					// Probability that the agent is in city B1, which is a neighbour of city A1, while there is a task present to city B2, after SKIPping from city A1 
-					return (1 / cityA1.neighbors().size()) * td.probability(cityB1, cityB2);
+					return (1.0 / cityA1.neighbors().size()) * td.probability(cityB1, cityB2);
 				}else{
 					// Probability that the agent is in city B1, which is a neighbour of city A1, while there is no task present, after SKIPping from city A1
-					return (1 / cityA1.neighbors().size()) * td.probability(cityB1, null);
+					return (1.0 / cityA1.neighbors().size()) * td.probability(cityB1, null);
 				}
 			}else{
 				// Probability that the agent is in city B1, which is NOT a neighbour of city A1, after SKIPping from city A1
