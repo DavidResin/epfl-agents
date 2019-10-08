@@ -44,8 +44,9 @@ public class MyState {
 		return citySrc.distanceTo(cityDst);
 	}
 	
+	@Override
 	public String toString(){
-		return citySrc + "-" + cityDst;
+		return citySrc.name + "-" + cityDst.name;
 	}
 	
 	public static MyState find(City citySrc, City cityDst){

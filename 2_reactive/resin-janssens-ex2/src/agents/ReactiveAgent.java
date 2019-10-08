@@ -1,5 +1,6 @@
 package agents;
 
+import java.util.Map;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -23,9 +24,9 @@ public class ReactiveAgent implements ReactiveBehavior {
 	private Agent myAgent;
 	private TaskDistribution td;
 	private Topology topology;
-	private HashMap<MyState, Double> V;
-	private HashMap<MyState, MyAction> Best;
 	private double numSkippedActions = 0.0;
+	private Map<MyState, Double> V;
+	private Map<MyState, MyAction> Best;
 
 	@Override
 	public void setup(Topology topology, TaskDistribution td, Agent agent) {
@@ -48,60 +49,62 @@ public class ReactiveAgent implements ReactiveBehavior {
 	}
 	
 	public void reinforcementLearningAlgorithm(double discount) {		
-		// Boolean to indicate whether the last iteration of the RLA has changed V
-		boolean improvement = true;
+		double threshold = 0.0001;
+		double max = threshold + 1;
 		
-		V = new HashMap<MyState, Double>();
+		Map<MyState, Double> nextV = new HashMap<MyState, Double>();
+		Map<MyState, Double> currV;
 		Best = new HashMap<MyState, MyAction>();
 		
 		for (MyState state : MyState.getAllStates())
-			V.put(state, 0.0);
+			nextV.put(state, 0.0);
 		
-		int run = 0;
-		
-		while (improvement) {
-			run++;
-			improvement = false;
+		while (max > threshold) {
+			currV = nextV;
+			nextV = new HashMap<MyState, Double>();
+			
+			for (MyState state : MyState.getAllStates())
+				nextV.put(state, 0.0);
 			
 			for (MyState currState : MyState.getAllStates()) {
-				HashMap<MyAction, Double> Q = new HashMap<MyAction, Double>();
+				Map<MyAction, Double> Q = new HashMap<MyAction, Double>();
 				
 				for (MyAction action : MyAction.values()) {
 					double value = getReward(currState, action);
 					
 					for (MyState nextState : MyState.getAllStates()) {
 						double transProb = getTransProb(currState, action, nextState);
-						double nextValue = V.get(nextState);
+						double nextValue = nextV.get(nextState);
 						value += discount * transProb * nextValue;
 					}
 					
 					Q.put(action, value);
-					
-					if (V.get(currState) == null || value > V.get(currState)) {
-						// Make the improvement flag true since V has been updated
-						improvement = true;
-						V.put(currState, value);
-						Best.put(currState, action);
-					}
+					nextV.put(currState, value);
+					Best.put(currState, action);
 				}
 			}
+			
+			max = getMaxVChange(currV, nextV);
 		}
+		
+		V = nextV;
 	}
 
 	@Override
 	public Action act(Vehicle vehicle, Task availableTask) {
 		Action action;
-		MyState state = MyState.find(vehicle.getCurrentCity(), availableTask == null ? vehicle.getCurrentCity() : availableTask.deliveryCity);
-		System.out.println(V.get(state));
+		City city = vehicle.getCurrentCity();
+		MyState state = MyState.find(city, availableTask == null ? vehicle.getCurrentCity() : availableTask.deliveryCity);
+		
 		if (Best.get(state) == MyAction.SKIP) {
-			City currentCity = vehicle.getCurrentCity();
 			System.out.println(state + ": SKIP");
+			action = new Move(city.randomNeighbor(random));
 			numSkippedActions += 1;
-			action = new Move(currentCity.randomNeighbor(random));
 		}
-		else{
+
+		else {
+			System.out.println(state + ": TAKE");
 			action = new Pickup(availableTask);
-			System.out.println(state + ": SKIP");
 		}
 		
 		if (numActions >= 1){
@@ -178,5 +181,18 @@ public class ReactiveAgent implements ReactiveBehavior {
 			sum += td.probability(citySrc, cityDst);
 		
 		return 1 - sum;
+	}
+	
+	private double getMaxVChange(Map<MyState, Double> currV, Map<MyState, Double> nextV) {
+		double max = 0d;
+		
+		for (MyState state : currV.keySet()) {
+			double temp = Math.abs(currV.get(state) - nextV.get(state));
+			
+			if (temp > max)
+				max = temp;
+		}
+		
+		return max;
 	}
 }
