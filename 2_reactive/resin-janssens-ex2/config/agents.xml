@@ -17,27 +17,27 @@
 	</agent>
 
 	<agent name="reactive-rla">
-		<set class-path="bin/"/>
+		<set class-path="bin/"></set>
 		<set class-name="agents.ReactiveAgent"/>
-		<set discount-factor=".85"/>
+		<set discount-factor=".1"></set>
 	</agent>
 	
 	<agent name="reactive-rla-2">
-		<set class-path="bin/"/>
+		<set class-path="bin/"></set>
 		<set class-name="agents.ReactiveAgent"/>
-		<set discount-factor=".7"/>
+		<set discount-factor=".5"></set>
 	</agent>
 	
 	<agent name="reactive-rla-3">
 		<set class-path="bin/"/>
 		<set class-name="agents.ReactiveAgent"/>
-		<set discount-factor=".5"/>
+		<set discount-factor=".1"/>
 	</agent>
 	
 	<agent name="reactive-rla-4">
 		<set class-path="bin/"/>
 		<set class-name="agents.ReactiveAgent"/>
-		<set discount-factor=".35"/>
+		<set discount-factor=".3"/>
 	</agent>
 	
 	<agent name="reactive-rla-5">
