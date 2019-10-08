@@ -23,7 +23,6 @@ public class ReactiveAgent implements ReactiveBehavior {
 	private int numActions;
 	private Agent myAgent;
 	private TaskDistribution td;
-	private Topology topology;
 	private double numSkippedActions = 0.0;
 	private Map<MyState, Double> V;
 	private Map<MyState, MyAction> Best;
@@ -39,7 +38,6 @@ public class ReactiveAgent implements ReactiveBehavior {
 		this.numActions = 0;
 		this.myAgent = agent;
 		this.td = td;
-		this.topology = topology;
 		
 		MyState.setStates(topology.cities());
 		reinforcementLearningAlgorithm(discount);

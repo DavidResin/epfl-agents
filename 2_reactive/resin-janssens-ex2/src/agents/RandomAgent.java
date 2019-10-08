@@ -1,4 +1,4 @@
-package template;
+package agents;
 
 import java.util.Random;
 
@@ -13,7 +13,7 @@ import logist.task.TaskDistribution;
 import logist.topology.Topology;
 import logist.topology.Topology.City;
 
-public class DummyAgent2 implements ReactiveBehavior {
+public class RandomAgent implements ReactiveBehavior {
 
 	private Random random;
 	private double pPickup;
@@ -53,3 +53,4 @@ public class DummyAgent2 implements ReactiveBehavior {
 		return action;
 	}
 }
+
