@@ -2,6 +2,13 @@ package agents;
 
 /* import table */
 import logist.simulation.Vehicle;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
+
+import datatypes.Action;
+import datatypes.State;
 import logist.agent.Agent;
 import logist.behavior.DeliberativeBehavior;
 import logist.plan.Plan;
@@ -57,7 +64,33 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 			plan = naivePlan(vehicle, tasks);
 			break;
 		case BFS:
-			// ...
+			// Initialize Q and C
+			Queue<State> Q = new LinkedList<State>();
+			ArrayList<State> C = new ArrayList<State>();
+			ArrayList<State> goalStates = new ArrayList<State>();
+			
+			// Initialize initial state
+			State initialState = new State(topology.cities());
+			for(Task task : tasks){
+				initialState.getCityMap().get(task.pickupCity).put(task.deliveryCity, task);
+			}
+			initialState.setCurrentCity(vehicle.getCurrentCity());
+			Q.add(initialState);
+			
+			while(!Q.isEmpty()){
+				State currentState = Q.poll();
+				// Is the current state a goal state?
+				if(currentState.getCarriedWeight() == 0 && !currentState.tasksLeft()){
+					goalStates.add(currentState);
+				}
+				// Is a deliver action possible?
+				if(currentState.getCarriedTasks().get(currentState.getCurrentCity()) != null){
+					State newState = new State(currentState);
+					newState.getCarriedTasks().put(currentState.getCurrentCity(), null);
+					newState.getPlan().appendDelivery(currentState.getCarriedTasks().get(currentState.getCurrentCity()));
+				}
+			}
+			
 			plan = naivePlan(vehicle, tasks);
 			break;
 		default:
