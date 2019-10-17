@@ -72,23 +72,26 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 			// Initialize initial state
 			State initialState = new State(topology.cities());
 			for(Task task : tasks){
-				initialState.getCityMap().get(task.pickupCity).put(task.deliveryCity, task);
+				initialState.getCityMap().get(task.pickupCity).add(task);
 			}
 			initialState.setCurrentCity(vehicle.getCurrentCity());
 			Q.add(initialState);
 			
 			while(!Q.isEmpty()){
 				State currentState = Q.poll();
+				
 				// Is the current state a goal state?
 				if(currentState.getCarriedWeight() == 0 && !currentState.tasksLeft()){
 					goalStates.add(currentState);
+					continue;
 				}
-				// Is a deliver action possible?
-				if(currentState.getCarriedTasks().get(currentState.getCurrentCity()) != null){
-					State newState = new State(currentState);
-					newState.getCarriedTasks().put(currentState.getCurrentCity(), null);
-					newState.getPlan().appendDelivery(currentState.getCarriedTasks().get(currentState.getCurrentCity()));
-				}
+				
+				// Did we already visit the current state? (Cycle detection)
+				
+				C.add(currentState);
+				
+				// Calculate the successor states and add them to the queue
+				Q.addAll(getSuccessorStates(currentState, vehicle.capacity()));
 			}
 			
 			plan = naivePlan(vehicle, tasks);
@@ -160,5 +163,46 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 			// you will need to consider the carriedTasks when the next
 			// plan is computed.
 		}
+	}
+	
+	public ArrayList<State> getSuccessorStates(State currentState, int capacity){
+		ArrayList<State> successors = new ArrayList<State>();
+		
+		City currentCity = currentState.getCurrentCity();
+		// Is a deliver action possible?
+		if(!currentState.getCarriedTasks().get(currentCity).isEmpty()){
+			State newState = new State(currentState);
+			newState.getCarriedTasks().get(currentCity).clear();
+			for(Task task : currentState.getCarriedTasks().get(currentCity)){
+				newState.getPlan().appendDelivery(task);
+			}
+			successors.add(newState);
+		}
+		
+		// Is a pickup action possible?
+		if(!currentState.getCityMap().get(currentCity).isEmpty()){
+			boolean pickedUp = false;
+			int totalWeight = currentState.getCarriedWeight();
+			State newState = new State(currentState);
+			for(Task task : currentState.getCityMap().get(currentCity)){
+				if(totalWeight + task.weight <= capacity){
+					newState.getPlan().appendPickup(task);
+					newState.getCarriedTasks().get(task.deliveryCity).add(task);
+					newState.getCityMap().get(currentCity).remove(task);
+					totalWeight += task.weight;
+					pickedUp = true;
+				}
+			}
+			if(pickedUp)
+				successors.add(newState);
+		}
+		
+		// Add all the possible move actions
+		for(City neighbor : currentCity.neighbors()){
+			State newState = new State(currentState);
+			newState.setCurrentCity(neighbor);
+			successors.add(newState);
+		}
+		return successors;
 	}
 }
