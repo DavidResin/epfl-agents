@@ -8,25 +8,25 @@ import logist.topology.Topology.City;
 
 public class State {
 	private City currentCity;
-	private Map<City, Map<City, Boolean>> cityMap;
-	private Map<City, Boolean> carriedTasks;
+	private Map<City, Map<City, Integer>> cityMap;
+	private Map<City, Integer> carriedTasks;
 	
 	public State(List<City> cities){
-		cityMap = new HashMap<City, Map<City, Boolean>>();
+		cityMap = new HashMap<City, Map<City, Integer>>();
 		for(City city : cities){
-			carriedTasks.put(city, false);
-			cityMap.put(city, new HashMap<City, Boolean>());
+			carriedTasks.put(city, 0);
+			cityMap.put(city, new HashMap<City, Integer>());
 			for(City city2 : cities){
-				cityMap.get(city).put(city2, false);
+				cityMap.get(city).put(city2, 0);
 			}
 		}
 	}
 	
-	public Map<City, Map<City, Boolean>> getCityMap(){
+	public Map<City, Map<City, Integer>> getCityMap(){
 		return cityMap;
 	}
 	
-	public Map<City, Boolean> getCarriedTasks(){
+	public Map<City, Integer> getCarriedTasks(){
 		return carriedTasks;
 	}
 	
