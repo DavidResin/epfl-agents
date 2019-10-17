@@ -36,7 +36,7 @@
 				<set home="Paris" />
 				<set speed="220" />
 				<set capacity="30" />
-				<set cost-per-km="20" />
+				<set cost-per-km="5" />
 			</vehicle>
 		</company>
 		
