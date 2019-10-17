@@ -1,5 +1,6 @@
 package datatypes;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,41 +11,35 @@ import logist.topology.Topology.City;
 
 public class State {
 	private City currentCity;
-	private Map<City, Map<City, Task>> cityMap;
-	private Map<City, Task> carriedTasks;
+	private Map<City, ArrayList<Task>> cityMap;
+	private Map<City, ArrayList<Task>> carriedTasks;
 	private Plan plan;
 	
 	public State(List<City> cities){
-		cityMap = new HashMap<City, Map<City, Task>>();
-		carriedTasks = new HashMap<City, Task>();
+		cityMap = new HashMap<City, ArrayList<Task>>();
+		carriedTasks = new HashMap<City, ArrayList<Task>>();
 		for(City city : cities){
-			carriedTasks.put(city, null);
-			cityMap.put(city, new HashMap<City, Task>());
-			for(City city2 : cities){
-				cityMap.get(city).put(city2, null);
-			}
+			carriedTasks.put(city, new ArrayList<Task>());
+			cityMap.put(city, new ArrayList<Task>());
 		}
 		plan = Plan.EMPTY;
 	}
 	
 	public State(State state){
 		currentCity = state.currentCity;
-		cityMap = new HashMap<City, Map<City, Task>>();
+		cityMap = new HashMap<City, ArrayList<Task>>();
 		for(City city : state.getCityMap().keySet()){
 			carriedTasks.put(city, state.getCarriedTasks().get(city));
-			cityMap.put(city, new HashMap<City, Task>());
-			for(City city2 : state.getCityMap().keySet()){
-				cityMap.get(city).put(city2, state.getCityMap().get(city).get(city2));
-			}
+			cityMap.put(city, state.getCityMap().get(city));
 		}
 		plan = state.plan;
 	}
 	
-	public Map<City, Map<City, Task>> getCityMap(){
+	public Map<City, ArrayList<Task>> getCityMap(){
 		return cityMap;
 	}
 	
-	public Map<City, Task> getCarriedTasks(){
+	public Map<City, ArrayList<Task>> getCarriedTasks(){
 		return carriedTasks;
 	}
 	
@@ -63,18 +58,17 @@ public class State {
 	public int getCarriedWeight(){
 		int carriedWeight = 0;
 		for(City city : carriedTasks.keySet()){
-			carriedWeight += carriedTasks.get(city).weight;
+			for(Task task : carriedTasks.get(city)){
+				carriedWeight += task.weight;
+			}
 		}
 		return carriedWeight;
 	}
 	
 	public boolean tasksLeft(){
 		for(City city : cityMap.keySet()){
-			for(City city2 : cityMap.get(city).keySet()){
-				if(cityMap.get(city).get(city2) != null){
-					return true;
-				}
-			}
+			if(!cityMap.get(city).isEmpty())
+				return true;
 		}
 		return false;
 	}
