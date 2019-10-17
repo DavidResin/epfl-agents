@@ -88,6 +88,10 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 		}
 		return plan;
 	}
+	
+	private Plan aStar(Vehicle vehicle, TaskSet tasks) {
+		
+	}
 
 	@Override
 	public void planCancelled(TaskSet carriedTasks) {
