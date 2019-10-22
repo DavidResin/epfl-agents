@@ -152,7 +152,6 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 		}
 		bestPlans.put(initialState, Plan.EMPTY);
 		Q.add(new Pair<State, Plan>(initialState, Plan.EMPTY));
-		System.out.println(initialState.getCityMap());
 		
 		while(!Q.isEmpty()){
 			Pair<State, Plan> nextEntry = Q.poll();
@@ -207,7 +206,6 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 			// you will need to consider the carriedTasks when the next
 			// plan is computed.
 		}
-		System.out.println("carriedTasks: " + carriedTasks);
 	}
 	
 	public ArrayList<Pair<State, Plan>> getSuccessorStates(State currentState, Plan currentPlan, Vehicle vehicle){
