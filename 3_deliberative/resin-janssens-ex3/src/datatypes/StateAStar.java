@@ -85,8 +85,8 @@ public class StateAStar implements Comparable<StateAStar> {
 		return false;
 	}
 
-	public List<StateAStar> getNextStates(StateAStar state) {
-		List<StepAStar> steps = getNextSteps(state);
+	public List<StateAStar> getNextStates() {
+		List<StepAStar> steps = getNextSteps();
 		List<StateAStar> states = new ArrayList<StateAStar>();
 		
 		for (StepAStar s : steps) {
@@ -116,7 +116,7 @@ public class StateAStar implements Comparable<StateAStar> {
 		this.currentCity = city;
 	}
 
-	public List<StepAStar> getNextSteps(StateAStar state) {
+	public List<StepAStar> getNextSteps() {
 		List<StepAStar> steps = new ArrayList<StepAStar>();
 		
 		for (Task t : newTasks)

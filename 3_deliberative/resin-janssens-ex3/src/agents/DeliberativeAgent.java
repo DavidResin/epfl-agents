@@ -12,6 +12,7 @@ import java.util.Queue;
 
 import datatypes.Action;
 import datatypes.State;
+import datatypes.StateAStar;
 import javafx.util.Pair;
 import logist.agent.Agent;
 import logist.behavior.DeliberativeBehavior;
@@ -64,8 +65,7 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 		// Compute the plan with the selected algorithm.
 		switch (algorithm) {
 		case ASTAR:
-			// ...
-			plan = naivePlan(vehicle, tasks);
+			plan = aStar(vehicle, tasks);
 			break;
 		case BFS:
 			plan = breadthFirstSearch(vehicle, tasks);
@@ -99,20 +99,21 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 		return plan;
 	}
 	
-	private State initialState(Vehicle vehicle, TaskSet tasks) {
-		State state = new State();
-		state.setCurrentTasks(tasks.clone());
-		state.setCarriedTasks(vehicle.getCurrentTasks().clone());
+	private StateAStar initialState(Vehicle vehicle, TaskSet tasks) {
+		StateAStar state = new StateAStar();
+		state.setNewTasks(tasks.clone());
+		state.setCurrTasks(vehicle.getCurrentTasks().clone());
 		state.setCurrentCity(vehicle.getCurrentCity());
+		return state;
 	}
 	
 	private Plan aStar(Vehicle vehicle, TaskSet tasks) {
 		// what heuristic to choose?
 		// f(n) (current cost) = g(n) (cost so far) + List<A> (projected cost)
-		List<State> Q = new ArrayList<State>();
-		List<State> C = new ArrayList<State>();
+		List<StateAStar> Q = new ArrayList<StateAStar>();
+		List<StateAStar> C = new ArrayList<StateAStar>();
 		Q.add(initialState(vehicle, tasks));
-		State n = null;
+		StateAStar n = null;
 		int steps = 0;
 		
 		do {
@@ -121,7 +122,7 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 			
 			if (n.isBetterThan(C)) {
 				C.add(n);
-				Q.addAll(n.nextStates());
+				Q.addAll(n.getNextStates());
 				Collections.sort(Q);
 			}
 		}
