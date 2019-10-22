@@ -4,11 +4,13 @@ package agents;
 import logist.simulation.Vehicle;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 
 import datatypes.Action;
 import datatypes.State;
+import javafx.util.Pair;
 import logist.agent.Agent;
 import logist.behavior.DeliberativeBehavior;
 import logist.plan.Plan;
@@ -64,37 +66,7 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 			plan = naivePlan(vehicle, tasks);
 			break;
 		case BFS:
-			// Initialize Q and C
-			Queue<State> Q = new LinkedList<State>();
-			ArrayList<State> C = new ArrayList<State>();
-			ArrayList<State> goalStates = new ArrayList<State>();
-			
-			// Initialize initial state
-			State initialState = new State(topology.cities());
-			for(Task task : tasks){
-				initialState.getCityMap().get(task.pickupCity).add(task);
-			}
-			initialState.setCurrentCity(vehicle.getCurrentCity());
-			Q.add(initialState);
-			
-			while(!Q.isEmpty()){
-				State currentState = Q.poll();
-				
-				// Is the current state a goal state?
-				if(currentState.getCarriedWeight() == 0 && !currentState.tasksLeft()){
-					goalStates.add(currentState);
-					continue;
-				}
-				
-				// Did we already visit the current state? (Cycle detection)
-				
-				C.add(currentState);
-				
-				// Calculate the successor states and add them to the queue
-				Q.addAll(getSuccessorStates(currentState, vehicle.capacity()));
-			}
-			
-			plan = naivePlan(vehicle, tasks);
+			plan = breadthFirstSearch(vehicle, tasks);
 			break;
 		default:
 			throw new AssertionError("Should not happen.");
@@ -130,6 +102,7 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 		return null;
 	}
 	
+	/*
 	private Plan aStar(Vehicle vehicle, TaskSet tasks) {
 		// what heuristic to choose?
 		// f(n) (current cost) = g(n) (cost so far) + List<A> (projected cost)
@@ -154,6 +127,70 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 		
 		return n.getPlan();
 	}
+	*/
+	
+	private Plan breadthFirstSearch(Vehicle vehicle, TaskSet tasks){
+		Plan plan;
+		
+		// Initialize Q and C
+		Queue<Pair<State, Plan>> Q = new LinkedList<Pair<State, Plan>>();
+		ArrayList<State> C = new ArrayList<State>();
+		ArrayList<State> goalStates = new ArrayList<State>();
+		HashMap<State, Plan> bestPlans = new HashMap<State, Plan>();
+		
+		// Initialize initial state
+		State initialState = new State(topology.cities());
+		for(Task task : tasks){
+			initialState.getCityMap().get(task.pickupCity).add(task);
+		}
+		initialState.setCurrentCity(vehicle.getCurrentCity());
+		bestPlans.put(initialState, Plan.EMPTY);
+		Q.add(new Pair<State, Plan>(initialState, Plan.EMPTY));
+		System.out.println(initialState.getCityMap());
+		
+		while(!Q.isEmpty()){
+			Pair<State, Plan> nextEntry = Q.poll();
+			State currentState = nextEntry.getKey();
+			Plan currentPlan = nextEntry.getValue();
+			
+			// Did we already visit the current state? (Cycle detection)
+			boolean alreadyVisited = false;
+			for(State state : C){
+				if(state.equals(currentState)){
+					if(bestPlans.get(state).totalDistance() >= currentPlan.totalDistance()){
+						bestPlans.put(currentState, currentPlan);
+					}
+					alreadyVisited = true;
+					break;
+				}
+			}
+			if(alreadyVisited)
+				continue;
+			else
+				bestPlans.put(currentState, currentPlan);
+			
+			C.add(currentState);
+			
+			// Is the current state a goal state?
+			if(currentState.getCarriedWeight() == 0 && !currentState.tasksLeft()){
+				goalStates.add(currentState);
+				continue;
+			}
+			
+			// Calculate the successor states and add them to the queue
+			Q.addAll(getSuccessorStates(currentState, bestPlans.get(currentState), vehicle));
+		}
+		
+		// Find the goal state with the cheapest plan
+		plan = bestPlans.get(goalStates.get(0));
+		for(State goalState : goalStates){
+			if(bestPlans.get(goalState).totalDistance() < plan.totalDistance()){
+				plan = bestPlans.get(goalState);
+			}
+		}
+		System.out.println("Best plan cost: " + plan.totalDistance());
+		return plan;
+	}
 
 	@Override
 	public void planCancelled(TaskSet carriedTasks) {
@@ -165,18 +202,21 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 		}
 	}
 	
-	public ArrayList<State> getSuccessorStates(State currentState, int capacity){
-		ArrayList<State> successors = new ArrayList<State>();
+	public ArrayList<Pair<State, Plan>> getSuccessorStates(State currentState, Plan currentPlan, Vehicle vehicle){
+		ArrayList<Pair<State, Plan>> successors = new ArrayList<Pair<State, Plan>>();
 		
 		City currentCity = currentState.getCurrentCity();
+		int capacity = vehicle.capacity();
+		
 		// Is a deliver action possible?
 		if(!currentState.getCarriedTasks().get(currentCity).isEmpty()){
 			State newState = new State(currentState);
+			Plan newPlan = copyPlan(currentPlan, vehicle.getCurrentCity());
 			newState.getCarriedTasks().get(currentCity).clear();
 			for(Task task : currentState.getCarriedTasks().get(currentCity)){
-				newState.getPlan().appendDelivery(task);
+				newPlan.appendDelivery(task);
 			}
-			successors.add(newState);
+			successors.add(new Pair<State, Plan>(newState, newPlan));
 		}
 		
 		// Is a pickup action possible?
@@ -184,25 +224,37 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 			boolean pickedUp = false;
 			int totalWeight = currentState.getCarriedWeight();
 			State newState = new State(currentState);
+			Plan newPlan = copyPlan(currentPlan, vehicle.getCurrentCity());
 			for(Task task : currentState.getCityMap().get(currentCity)){
 				if(totalWeight + task.weight <= capacity){
-					newState.getPlan().appendPickup(task);
+					newPlan.appendPickup(task);
 					newState.getCarriedTasks().get(task.deliveryCity).add(task);
 					newState.getCityMap().get(currentCity).remove(task);
 					totalWeight += task.weight;
 					pickedUp = true;
 				}
 			}
+			
 			if(pickedUp)
-				successors.add(newState);
+				successors.add(new Pair<State, Plan>(newState, newPlan));
 		}
 		
 		// Add all the possible move actions
 		for(City neighbor : currentCity.neighbors()){
 			State newState = new State(currentState);
+			Plan newPlan = copyPlan(currentPlan, vehicle.getCurrentCity());
 			newState.setCurrentCity(neighbor);
-			successors.add(newState);
+			newPlan.appendMove(neighbor);
+			successors.add(new Pair<State, Plan>(newState, newPlan));
 		}
 		return successors;
+	}
+	
+	public Plan copyPlan(Plan oldPlan, City initialCity){
+		Plan newPlan = new Plan(initialCity);
+		for(logist.plan.Action action : oldPlan){
+			newPlan.append(action);
+		}
+		return newPlan;
 	}
 }
