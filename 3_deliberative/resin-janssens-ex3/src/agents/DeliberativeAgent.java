@@ -195,7 +195,7 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 				plan = bestPlans.get(goalState);
 			}
 		}
-		System.out.println("Best plan cost: " + plan.totalDistance());
+		System.out.println("Agent " + agent.id() + "Best plan cost: " + plan.totalDistance());
 		System.out.println(plan);
 		return plan;
 	}
@@ -208,6 +208,8 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 			// you will need to consider the carriedTasks when the next
 			// plan is computed.
 		}
+		
+		System.out.println("Agent " + agent.id() + ": " + agent.getTotalDistance());
 	}
 	
 	public ArrayList<Pair> getSuccessorStates(State currentState, Plan currentPlan, Vehicle vehicle){
