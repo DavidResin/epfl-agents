@@ -4,8 +4,10 @@ package agents;
 import logist.simulation.Vehicle;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 import datatypes.Action;
@@ -98,36 +100,35 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 	}
 	
 	private State initialState(Vehicle vehicle, TaskSet tasks) {
-		// TODO
-		return null;
+		State state = new State();
+		state.setCurrentTasks(tasks.clone());
+		state.setCarriedTasks(vehicle.getCurrentTasks().clone());
+		state.setCurrentCity(vehicle.getCurrentCity());
 	}
 	
-	/*
 	private Plan aStar(Vehicle vehicle, TaskSet tasks) {
 		// what heuristic to choose?
 		// f(n) (current cost) = g(n) (cost so far) + List<A> (projected cost)
 		List<State> Q = new ArrayList<State>();
 		List<State> C = new ArrayList<State>();
-		Q.append(initialState(vehicle, tasks));
+		Q.add(initialState(vehicle, tasks));
 		State n = null;
 		int steps = 0;
 		
 		do {
+			n = Q.remove(0);
 			steps++;
-			n = Q.head;
-			Q.remove(0);
-				
-			if (!C.contains(n)) {
-				C.append(n);
-				Q.appendList(n.nextStates());
-				Q = Collections.sort(Q);
+			
+			if (n.isBetterThan(C)) {
+				C.add(n);
+				Q.addAll(n.nextStates());
+				Collections.sort(Q);
 			}
 		}
-		while (!Q.isEmpty() && !n.isFinal())
+		while (!n.isFinal() && !Q.isEmpty());
 		
-		return n.getPlan();
+		return n.getPlan(vehicle);
 	}
-	*/
 	
 	private Plan breadthFirstSearch(Vehicle vehicle, TaskSet tasks){
 		Plan plan;
