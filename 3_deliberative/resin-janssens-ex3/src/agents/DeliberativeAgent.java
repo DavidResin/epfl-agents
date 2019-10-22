@@ -13,7 +13,7 @@ import java.util.Queue;
 import datatypes.Action;
 import datatypes.State;
 import datatypes.StateAStar;
-import javafx.util.Pair;
+import datatypes.Pair;
 import logist.agent.Agent;
 import logist.behavior.DeliberativeBehavior;
 import logist.plan.Plan;
@@ -135,7 +135,7 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 		Plan plan;
 
 		// Initialize data structures
-		Queue<Pair<State, Plan>> Q = new LinkedList<Pair<State, Plan>>();
+		Queue<Pair> Q = new LinkedList<Pair>();
 		ArrayList<State> C = new ArrayList<State>();
 		HashMap<State, Plan> bestPlans = new HashMap<State, Plan>();
 		ArrayList<State> goalStates = new ArrayList<State>();
@@ -153,10 +153,10 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 			}
 		}
 		bestPlans.put(initialState, Plan.EMPTY);
-		Q.add(new Pair<State, Plan>(initialState, Plan.EMPTY));
+		Q.add(new Pair(initialState, Plan.EMPTY));
 		
 		while(!Q.isEmpty()){
-			Pair<State, Plan> nextEntry = Q.poll();
+			Pair nextEntry = Q.poll();
 			State currentState = nextEntry.getKey();
 			Plan currentPlan = nextEntry.getValue();
 			
@@ -210,8 +210,8 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 		}
 	}
 	
-	public ArrayList<Pair<State, Plan>> getSuccessorStates(State currentState, Plan currentPlan, Vehicle vehicle){
-		ArrayList<Pair<State, Plan>> successors = new ArrayList<Pair<State, Plan>>();
+	public ArrayList<Pair> getSuccessorStates(State currentState, Plan currentPlan, Vehicle vehicle){
+		ArrayList<Pair> successors = new ArrayList<Pair>();
 		
 		City currentCity = currentState.getCurrentCity();
 		int capacity = vehicle.capacity();
@@ -224,7 +224,7 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 			for(Task task : currentState.getCarriedTasks().get(currentCity)){
 				newPlan.appendDelivery(task);
 			}
-			successors.add(new Pair<State, Plan>(newState, newPlan));
+			successors.add(new Pair(newState, newPlan));
 		}
 		
 		// Is a pickup action possible?
@@ -244,7 +244,7 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 			}
 			
 			if(pickedUp)
-				successors.add(new Pair<State, Plan>(newState, newPlan));
+				successors.add(new Pair(newState, newPlan));
 		}
 		
 		// Add all the possible move actions
@@ -253,7 +253,7 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 			Plan newPlan = copyPlan(currentPlan, vehicle.getCurrentCity());
 			newState.setCurrentCity(neighbor);
 			newPlan.appendMove(neighbor);
-			successors.add(new Pair<State, Plan>(newState, newPlan));
+			successors.add(new Pair(newState, newPlan));
 		}
 		return successors;
 	}
