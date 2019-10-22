@@ -131,7 +131,7 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 	
 	private Plan breadthFirstSearch(Vehicle vehicle, TaskSet tasks){
 		Plan plan;
-		
+
 		// Initialize Q and C
 		Queue<Pair<State, Plan>> Q = new LinkedList<Pair<State, Plan>>();
 		ArrayList<State> C = new ArrayList<State>();
@@ -144,6 +144,12 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 			initialState.getCityMap().get(task.pickupCity).add(task);
 		}
 		initialState.setCurrentCity(vehicle.getCurrentCity());
+		// Check if the vehicle is already holding tasks (in case of a cancelled plan)
+		if(!vehicle.getCurrentTasks().isEmpty()){
+			for(Task task : vehicle.getCurrentTasks()){
+				initialState.getCarriedTasks().get(task.deliveryCity).add(task);
+			}
+		}
 		bestPlans.put(initialState, Plan.EMPTY);
 		Q.add(new Pair<State, Plan>(initialState, Plan.EMPTY));
 		System.out.println(initialState.getCityMap());
@@ -189,6 +195,7 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 			}
 		}
 		System.out.println("Best plan cost: " + plan.totalDistance());
+		System.out.println(plan);
 		return plan;
 	}
 
@@ -200,6 +207,7 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 			// you will need to consider the carriedTasks when the next
 			// plan is computed.
 		}
+		System.out.println("carriedTasks: " + carriedTasks);
 	}
 	
 	public ArrayList<Pair<State, Plan>> getSuccessorStates(State currentState, Plan currentPlan, Vehicle vehicle){
