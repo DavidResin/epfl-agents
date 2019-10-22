@@ -132,11 +132,11 @@ public class DeliberativeAgent implements DeliberativeBehavior {
 	private Plan breadthFirstSearch(Vehicle vehicle, TaskSet tasks){
 		Plan plan;
 
-		// Initialize Q and C
+		// Initialize data structures
 		Queue<Pair<State, Plan>> Q = new LinkedList<Pair<State, Plan>>();
 		ArrayList<State> C = new ArrayList<State>();
-		ArrayList<State> goalStates = new ArrayList<State>();
 		HashMap<State, Plan> bestPlans = new HashMap<State, Plan>();
+		ArrayList<State> goalStates = new ArrayList<State>();
 		
 		// Initialize initial state
 		State initialState = new State(topology.cities());
