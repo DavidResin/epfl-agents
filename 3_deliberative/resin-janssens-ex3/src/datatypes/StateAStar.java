@@ -16,12 +16,12 @@ public class StateAStar implements Comparable<StateAStar> {
 	private City currentCity;
 	private Map<City, ArrayList<Task>> cityMap;
 	private double g;
-	private List<Step> steps;
+	private List<StepAStar> steps;
 	private TaskSet newTasks;
 	private TaskSet currTasks;
 	
 	public StateAStar() {
-		
+		this.steps = new ArrayList<StepAStar>();
 	}
 	
 	public City getCurrentCity() {
@@ -107,9 +107,14 @@ public class StateAStar implements Comparable<StateAStar> {
 			
 			nextState.setCurrTasks(newCurrTasks);
 			nextState.setNewTasks(newNewTasks);
+			nextState.setSteps(steps);
 		}
 		
 		return states;
+	}
+
+	private void setSteps(List<StepAStar> steps2) {
+		this.steps = steps;
 	}
 
 	private void setCity(City city) {
@@ -137,8 +142,8 @@ public class StateAStar implements Comparable<StateAStar> {
 		City nextCity = null;
 		Plan plan = new Plan(vehicle.getCurrentCity());
 		
-		for (Step step : this.steps) {
-			if (step.type == Step.Type.PICK)
+		for (StepAStar step : this.steps) {
+			if (step.type == StepAStar.Type.PICK)
 				nextCity = step.task.pickupCity;
 			else
 				nextCity = step.task.deliveryCity;
@@ -146,7 +151,7 @@ public class StateAStar implements Comparable<StateAStar> {
 			for (City c : currCity.pathTo(nextCity))
 				currCity = nextCity;
 			
-			if (step.type == Step.Type.PICK)
+			if (step.type == StepAStar.Type.PICK)
 				plan.appendPickup(step.task);
 			else
 				plan.appendDelivery(step.task);
