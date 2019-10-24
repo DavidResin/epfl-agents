@@ -151,42 +151,51 @@ public class Assignment {
 	
 	public List<Plan> getPlans() {
 		List<Plan> plans = new ArrayList<Plan>();
-		for(Vehicle vehicle : vehicles){
+		
+		for (Vehicle vehicle : vehicles) {
 			Plan plan = new Plan(vehicle.getCurrentCity());
 			List<Boolean> pickedUp = new ArrayList<Boolean>();
-			for(int i = 0; i < tasks.size(); i++){
+			
+			for (int i = 0; i < tasks.size(); i++)
 				pickedUp.add(false);
-			}
+			
 			City currentCity = vehicle.getCurrentCity();
-			for(int i : orders.get(vehicles.indexOf(vehicle))){
-				if(!pickedUp.get(i)){
+			
+			for (int i : orders.get(vehicles.indexOf(vehicle))) {
+				if (!pickedUp.get(i)) {
 					// Pickup
 					City pickupCity = tasks.get(i).pickupCity; 
 					// Check if it is necessary to move
-					if(pickupCity != currentCity){
-						for(City pathCity : currentCity.pathTo(pickupCity)){
+					
+					if (pickupCity != currentCity) {
+						for (City pathCity : currentCity.pathTo(pickupCity)) {
 							plan.appendMove(pathCity);
 							currentCity = pathCity;
 						}
 					}
+					
 					// Pick up the packet
 					plan.appendPickup(tasks.get(i));
+					
 					// Mark that this task was picked up
 					pickedUp.set(i, true);
-				}else{
+				} else {
 					// Delivery
 					City deliveryCity = tasks.get(i).deliveryCity;
+					
 					// Check if it is necessary to move
-					if(deliveryCity != currentCity){
-						for(City pathCity : currentCity.pathTo(deliveryCity)){
+					if (deliveryCity != currentCity) {
+						for (City pathCity : currentCity.pathTo(deliveryCity)) {
 							plan.appendMove(pathCity);
 							currentCity = pathCity;
 						}
 					}
+					
 					// Deliver the packet
 					plan.appendDelivery(tasks.get(i));
 				}
 			}
+			
 			plans.add(plan);
 		}
 		

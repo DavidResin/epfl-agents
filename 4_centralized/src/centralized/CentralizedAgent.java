@@ -75,9 +75,10 @@ public class CentralizedAgent implements CentralizedBehavior {
     	// need stopping criteria
     	// uses selectInitialSolution() and localChoice()
     	System.out.println(vehicles);
-    	for(Task task : tasks){
+    	
+    	for (Task task : tasks)
     		System.out.println(task);
-    	}
+    	
     	// Get the initial solution
     	Assignment A = selectInitialSolution(vehicles, tasks);
     	
@@ -91,17 +92,18 @@ public class CentralizedAgent implements CentralizedBehavior {
     	// Get the largest vehicle
     	int largestVehicleIndex = 0;
     	int largestCapacity = 0;
-    	for(int i = 0; i < A.getVehicles().size(); i++){
-    		if(A.getVehicles().get(i).capacity() > largestCapacity){
+    	
+    	for (int i = 0; i < A.getVehicles().size(); i++) {
+    		if (A.getVehicles().get(i).capacity() > largestCapacity) {
     			largestCapacity = A.getVehicles().get(i).capacity();
     			largestVehicleIndex = i;
     		}
     	}
     	
     	// Assign all tasks to this vehicle
-    	for(int i = 0; i < A.getTasks().size(); i++){
+    	for (int i = 0; i < A.getTasks().size(); i++)
     		A.addTask(largestVehicleIndex, i);
-    	}
+    	
     	return A;
     }
     
