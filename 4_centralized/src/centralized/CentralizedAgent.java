@@ -74,7 +74,10 @@ public class CentralizedAgent implements CentralizedBehavior {
     	// TODO
     	// need stopping criteria
     	// uses selectInitialSolution() and localChoice()
-
+    	System.out.println(vehicles);
+    	for(Task task : tasks){
+    		System.out.println(task);
+    	}
     	// Get the initial solution
     	Assignment A = selectInitialSolution(vehicles, tasks);
     	

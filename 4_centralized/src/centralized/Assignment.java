@@ -10,6 +10,7 @@ import logist.plan.Plan;
 import logist.simulation.Vehicle;
 import logist.task.Task;
 import logist.task.TaskSet;
+import logist.topology.Topology.City;
 
 public class Assignment {
 	private final List<Task> tasks;
@@ -133,9 +134,41 @@ public class Assignment {
 		List<Plan> plans = new ArrayList<Plan>();
 		for(Vehicle vehicle : vehicles){
 			Plan plan = new Plan(vehicle.getCurrentCity());
-			for(Integer i : orders.get(vehicles.indexOf(vehicle))){
-				
+			List<Boolean> pickedUp = new ArrayList<Boolean>();
+			for(int i = 0; i < tasks.size(); i++){
+				pickedUp.add(false);
 			}
+			City currentCity = vehicle.getCurrentCity();
+			for(int i : orders.get(vehicles.indexOf(vehicle))){
+				if(!pickedUp.get(i)){
+					// Pickup
+					City pickupCity = tasks.get(i).pickupCity; 
+					// Check if it is necessary to move
+					if(pickupCity != currentCity){
+						for(City pathCity : currentCity.pathTo(pickupCity)){
+							plan.appendMove(pathCity);
+							currentCity = pathCity;
+						}
+					}
+					// Pick up the packet
+					plan.appendPickup(tasks.get(i));
+					// Mark that this task was picked up
+					pickedUp.set(i, true);
+				}else{
+					// Delivery
+					City deliveryCity = tasks.get(i).deliveryCity;
+					// Check if it is necessary to move
+					if(deliveryCity != currentCity){
+						for(City pathCity : currentCity.pathTo(deliveryCity)){
+							plan.appendMove(pathCity);
+							currentCity = pathCity;
+						}
+					}
+					// Deliver the packet
+					plan.appendDelivery(tasks.get(i));
+				}
+			}
+			plans.add(plan);
 		}
 		
 		return plans;
