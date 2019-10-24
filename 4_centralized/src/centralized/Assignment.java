@@ -72,31 +72,48 @@ public class Assignment {
     	return null;
     }
 	
-	// Shuffles tasks within a vehicle
-	private void shuffleTasks(int v_id) {
-		// TODO
-	}
-	
-	// Shuffles tasks between vehicles
-	private void shuffleVehicles() {
-		// TODO
-	}
-	
-	// Shuffles everything
-	private void shuffle() {
-		shuffleVehicles();
+	private boolean isValid() {
+		List<Boolean> presence = new ArrayList<Boolean>(Collections.nCopies(60, false));
 		
-		for (int i = 0; i < orders.size(); i++)
-			shuffleTasks(i);
-	}
-	
-	private boolean testConstraints() {
-		// tasks dont appear in 2 vehicles
-		// all tasks are taken and dropped by the same vehicle but not by NULL
-		// all tasks are picked up before they are delivered
-		// load can't be exceeded
+		for (int i = 0; i < vehicles.size(); i++) {
+			List<Integer> order = this.orders.get(i);
+			
+			for (int j = 0; j < tasks.size(); j++) {
+				if (order.contains(j)) {
+					// Test if one task is shared
+					if (presence.get(j))
+						return false;
+						
+					presence.set(j, true);
+				}
+			}
+			
+			int load = 0;
+			List<Integer> picked = new ArrayList<Integer>();
+			
+			for (int action : order) {
+				int weight = tasks.get(action).weight;
+				
+				if (picked.contains(action)) {
+					picked.remove(picked.indexOf(action));
+					load -= weight;
+				} else {
+					picked.add(action);
+					load += weight;
+					
+					// Test of capacity overload
+					if (load > vehicles.get(i).capacity())
+						return false;
+				}
+				
+				// Test if tasks left in vehicle
+				if (!picked.isEmpty())
+					return false;
+			}
+		}
 		
-		return false;
+		// Test if one task is untouched
+		return !presence.contains(false);
 	}
 	
 	public Plan getPlan() {
