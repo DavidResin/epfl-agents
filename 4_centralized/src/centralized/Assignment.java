@@ -15,23 +15,20 @@ public class Assignment {
 	private final List<Vehicle> vehicles;
 	
 	private List<List<Integer>> orders; // Map from a vehicle id to a list of task ids (pickup and deliveries)
-	private List<Integer> attributions; // Map from a task id to a vehicle id
 	
-	public Assignment(List<Task> tasks, List<Vehicle> vehicles, List<List<Integer>> orders, List<Integer> attributions) {
+	public Assignment(List<Task> tasks, List<Vehicle> vehicles, List<List<Integer>> orders) {
 		this.tasks = tasks;
 		this.vehicles = vehicles;
 		this.orders = orders;
-		this.attributions = attributions;
 	}
 	
 	public Assignment deepCopy() {
-		List<Integer> newAttributions = new ArrayList<Integer>(this.attributions);
 		List<List<Integer>> newOrders = new ArrayList<List<Integer>>();
 		
 		for (List<Integer> sublist : this.orders)
 		    newOrders.add(new ArrayList<Integer>(sublist));
 		
-		return new Assignment(this.tasks, this.vehicles, newOrders, newAttributions);
+		return new Assignment(this.tasks, this.vehicles, newOrders);
 	}
 	
 	private double cost() {
@@ -52,7 +49,6 @@ public class Assignment {
 	private void addTask(int v_id, int t_id) {
 		List<Integer> moving = Arrays.asList(new Integer[]{t_id, t_id});
 		this.orders.get(v_id).addAll(0, moving);
-		
 	}
 	
 	private void remTask(int v_id, int t_id) {
