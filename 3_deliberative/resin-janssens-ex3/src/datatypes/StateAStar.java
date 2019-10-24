@@ -1,8 +1,6 @@
 package datatypes;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -86,13 +84,14 @@ public class StateAStar implements Comparable<StateAStar> {
 	}
 
 	public List<StateAStar> getNextStates() {
-		List<StepAStar> steps = getNextSteps();
 		List<StateAStar> states = new ArrayList<StateAStar>();
 		
-		for (StepAStar s : steps) {
+		for (StepAStar s : getNextSteps()) {
 			TaskSet newCurrTasks = this.currTasks.clone();
 			TaskSet newNewTasks = this.newTasks.clone();
 			StateAStar nextState = new StateAStar();
+			List<StepAStar> steps = new ArrayList<StepAStar>(this.steps);
+			steps.add(s);
 			
 			if (s.type == StepAStar.Type.PICK) {
 				nextState.setCity(s.task.pickupCity);
@@ -108,12 +107,13 @@ public class StateAStar implements Comparable<StateAStar> {
 			nextState.setCurrTasks(newCurrTasks);
 			nextState.setNewTasks(newNewTasks);
 			nextState.setSteps(steps);
+			states.add(nextState);
 		}
 		
 		return states;
 	}
 
-	private void setSteps(List<StepAStar> steps2) {
+	private void setSteps(List<StepAStar> steps) {
 		this.steps = steps;
 	}
 
