@@ -2,6 +2,7 @@ package centralized;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -10,40 +11,68 @@ import logist.simulation.Vehicle;
 import logist.task.Task;
 
 public class Assignment {
-	List<Task> tasks;
-	List<Vehicle> vehicles;
+	private final List<Task> tasks;
+	private final List<Vehicle> vehicles;
 	
-	List<List<Integer>> orders; // Map from a vehicle id to a list of task ids (pickup and deliveries)
-	List<Integer> attributions; // Map from a task id to a vehicle id
+	private List<List<Integer>> orders; // Map from a vehicle id to a list of task ids (pickup and deliveries)
+	private List<Integer> attributions; // Map from a task id to a vehicle id
 	
-	// The domain here is trivial : it's just any number between 0 and 2 x n_tasks + n_vehicles - 1
+	public Assignment(List<Task> tasks, List<Vehicle> vehicles){
+		this.tasks = tasks;
+		this.vehicles = vehicles;
+		this.orders = new ArrayList<List<Integer>>();
+	}
 	
-	public Assignment() {
-		
+	public Assignment(List<Task> tasks, List<Vehicle> vehicles, List<List<Integer>> orders, List<Integer> attributions) {
+		this.tasks = tasks;
+		this.vehicles = vehicles;
+		this.orders = orders;
+		this.attributions = attributions;
 	}
 	
 	public Assignment deepCopy() {
-		return null;
+		List<Integer> newAttributions = new ArrayList<Integer>(this.attributions);
+		List<List<Integer>> newOrders = new ArrayList<List<Integer>>();
+		
+		for (List<Integer> sublist : this.orders)
+		    newOrders.add(new ArrayList<Integer>(sublist));
+		
+		return new Assignment(this.tasks, this.vehicles, newOrders, newAttributions);
 	}
 	
 	private double cost() {
 		// TODO
 		return 0;
 	}
+	
+	private void swapTasks(int v_id, int t1_id, int t2_id) {
+		Collections.swap(this.orders.get(v_id), t1_id, t2_id);
+	}
     
-    private Assignment changingTaskOrder() {
-    	// TODO
-    	return null;
+    private Assignment changingTaskOrder(int v_id, int t1_id, int t2_id) {
+    	Assignment newA = this.deepCopy();
+    	newA.swapTasks(v_id, t1_id, t2_id);    	
+    	return newA;
     }
 	
+	private void addTask(int v_id, int t_id) {
+		List<Integer> moving = Arrays.asList(new Integer[]{t_id, t_id});
+		this.orders.get(v_id).addAll(0, moving);
+		
+	}
+	
+	private void remTask(int v_id, int t_id) {
+		List<Integer> moving = Arrays.asList(new Integer[]{t_id, t_id});
+		this.orders.get(v_id).removeAll(moving);
+	}
+
 	// Move the first task of the src vehicle to the dst vehicle
 	private Assignment changingVehicle(int v_src_id, int v_dst_id) {
+		int t_id = this.orders.get(v_src_id).get(0);
+
 		Assignment newA = this.deepCopy();
-		int t_id = newA.orders.get(v_src_id).get(0);
-		List<Integer> moving = Arrays.asList(new Integer[]{t_id, t_id});
-		
-		newA.orders.get(v_src_id).removeAll(moving);
-		newA.orders.get(v_dst_id).addAll(moving);
+		newA.remTask(v_src_id, t_id);
+		newA.addTask(v_dst_id, t_id);
 		
 		return newA;
 	}
