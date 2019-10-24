@@ -80,7 +80,7 @@ public class Assignment {
 		return false;
 	}
 	
-	private Plan getPlan() {
+	public List<Plan> getPlans() {
 		//TODO
 		return null;
 	}
