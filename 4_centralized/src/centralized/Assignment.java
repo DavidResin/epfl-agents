@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
+
 import logist.plan.Plan;
 import logist.simulation.Vehicle;
 import logist.task.Task;
@@ -101,8 +103,28 @@ public class Assignment {
 	}
     
     public List<Assignment> chooseNeighbors() {
-    	// TODO
-    	return null;
+    	Random random = new Random();
+    	int v_src_id = random.nextInt(vehicles.size());
+    	
+    	List<Integer> order = orders.get(v_src_id);
+    	List<Assignment> N = new ArrayList<Assignment>();
+    	
+    	// Changing vehicle
+    	for (int v_dst_id = 0; v_dst_id < vehicles.size(); v_dst_id++) {
+    		int t_id = order.get(0);
+    		
+    		if (v_src_id != v_dst_id && vehicles.get(v_dst_id).capacity() >= tasks.get(t_id).weight)
+    			N.add(changingVehicle(v_src_id, v_dst_id));
+    	}
+    	
+    	// Changing task order
+    	if (order.size() > 2)
+    		for (int t1_id : order)
+    			for (int t2_id : order)
+    				if (t1_id != t2_id)
+    					N.add(changingTaskOrder(v_src_id, t1_id, t2_id));
+    	
+    	return N;
     }
 	
 	private boolean isValid() {
@@ -165,8 +187,8 @@ public class Assignment {
 				if (!pickedUp.get(i)) {
 					// Pickup
 					City pickupCity = tasks.get(i).pickupCity; 
-					// Check if it is necessary to move
 					
+					// Check if it is necessary to move
 					if (pickupCity != currentCity) {
 						for (City pathCity : currentCity.pathTo(pickupCity)) {
 							plan.appendMove(pathCity);
