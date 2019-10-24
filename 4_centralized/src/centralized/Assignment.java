@@ -4,11 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-
 import logist.plan.Plan;
 import logist.simulation.Vehicle;
 import logist.task.Task;
+import logist.topology.Topology.City;
 
 public class Assignment {
 	private final List<Task> tasks;
@@ -32,8 +31,29 @@ public class Assignment {
 	}
 	
 	private double cost() {
-		// TODO
-		return 0;
+		double sum = 0;
+		
+		for (int i = 0; i < vehicles.size(); i++) {
+			City currCity = vehicles.get(i).getCurrentCity();
+			City nextCity;
+			double cpkm = vehicles.get(i).costPerKm();
+			List<Integer> picked = new ArrayList<Integer>();
+			
+			for (int action : orders.get(i)) {
+				if (picked.contains(action)) {
+					picked.remove(picked.indexOf(action));
+					nextCity = tasks.get(action).deliveryCity;
+				} else {
+					picked.add(action);
+					nextCity = tasks.get(action).pickupCity;
+				}
+				
+				sum += cpkm * currCity.distanceUnitsTo(nextCity);
+				currCity = nextCity;
+			}
+		}
+		
+		return sum;
 	}
 	
 	private void swapTasks(int v_id, int t1_id, int t2_id) {
