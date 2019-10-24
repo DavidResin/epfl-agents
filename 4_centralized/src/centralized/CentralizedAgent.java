@@ -101,4 +101,34 @@ public class CentralizedAgent implements CentralizedBehavior {
         }
         return plan;
     }
+    
+    private Plan selectInitialSolution() {
+    	// TODO
+    	return null;
+    }
+    
+    private List<Plan> chooseNeighbors() {
+    	// TODO
+    	return null;
+    }
+    
+    private Plan changingVehicle() {
+    	// TODO
+    	return null;
+    }
+    
+    private Plan changingTaskOrder() {
+    	// TODO
+    	return null;
+    }
+    
+    private Plan updateTime() {
+    	// TODO
+    	return null;
+    }
+    
+    private Plan localChoice() {
+    	// TODO
+    	return null;
+    }
 }
