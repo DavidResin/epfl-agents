@@ -61,14 +61,7 @@ public class CentralizedAgent implements CentralizedBehavior {
     public List<Plan> plan(List<Vehicle> vehicles, TaskSet tasks) {
         long time_start = System.currentTimeMillis();
         
-//		System.out.println("Agent " + agent.id() + " has tasks " + tasks);
-        Plan planVehicle1 = naivePlan(vehicles.get(0), tasks);
-
-        List<Plan> plans = new ArrayList<Plan>();
-        plans.add(planVehicle1);
-        while (plans.size() < vehicles.size()) {
-            plans.add(Plan.EMPTY);
-        }
+        List<Plan> plans = CSPPlan(vehicles, tasks);
         
         long time_end = System.currentTimeMillis();
         long duration = time_end - time_start;
@@ -76,58 +69,21 @@ public class CentralizedAgent implements CentralizedBehavior {
         
         return plans;
     }
-
-    private Plan naivePlan(Vehicle vehicle, TaskSet tasks) {
-        City current = vehicle.getCurrentCity();
-        Plan plan = new Plan(current);
-
-        for (Task task : tasks) {
-            // move: current city => pickup location
-            for (City city : current.pathTo(task.pickupCity)) {
-                plan.appendMove(city);
-            }
-
-            plan.appendPickup(task);
-
-            // move: pickup location => delivery location
-            for (City city : task.path()) {
-                plan.appendMove(city);
-            }
-
-            plan.appendDelivery(task);
-
-            // set current city
-            current = task.deliveryCity;
-        }
-        return plan;
+    
+    private List<Plan> CSPPlan(List<Vehicle> vehicles, TaskSet tasks) {
+    	// TODO
+    	// need stopping criteria
+    	// uses selectInitialSolution() and localChoice()
+    	
+    	return null;
     }
     
-    private Plan selectInitialSolution() {
+    private Assignment selectInitialSolution() {
     	// TODO
     	return null;
     }
     
-    private List<Plan> chooseNeighbors() {
-    	// TODO
-    	return null;
-    }
-    
-    private Plan changingVehicle() {
-    	// TODO
-    	return null;
-    }
-    
-    private Plan changingTaskOrder() {
-    	// TODO
-    	return null;
-    }
-    
-    private Plan updateTime() {
-    	// TODO
-    	return null;
-    }
-    
-    private Plan localChoice() {
+    private Assignment localChoice(List<Assignment> N, Double proba) {
     	// TODO
     	return null;
     }
