@@ -108,7 +108,22 @@ public class CentralizedAgent implements CentralizedBehavior {
     }
     
     private Assignment localChoice(List<Assignment> N, Double proba) {
-    	// TODO
-    	return null;
+    	Assignment bestA = null;
+    	double bestCost, cost;
+    	Random random = new Random();
+    	
+    	if (random.nextFloat() > proba)
+    		return N.get(random.nextInt(N.size()));
+    	
+    	for (Assignment A : N) {
+    		cost = A.getCost();
+    		
+    		if (bestA == null || cost < bestCost) {
+    			bestA = A;
+    			bestCost = cost;
+    		}
+    	}
+    	
+    	return bestA;
     }
 }

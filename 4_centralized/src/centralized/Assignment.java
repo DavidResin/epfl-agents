@@ -45,7 +45,7 @@ public class Assignment {
 		return new Assignment(this.tasks, this.vehicles, newOrders);
 	}
 	
-	private double cost() {
+	public double getCost() {
 		double sum = 0;
 		
 		for (int i = 0; i < vehicles.size(); i++) {
