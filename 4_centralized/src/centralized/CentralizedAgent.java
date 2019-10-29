@@ -30,7 +30,7 @@ import logist.topology.Topology.City;
 public class CentralizedAgent implements CentralizedBehavior {
 	
 	private static final double PROBA_RANDOM = .5;
-	private static final int N_ITERATIONS = 1000;
+	private static final int N_ITERATIONS = 4000;
 	
     private Topology topology;
     private TaskDistribution distribution;
@@ -120,15 +120,16 @@ public class CentralizedAgent implements CentralizedBehavior {
     	}
     	
     	// Shuffle all vehicles
-    	for (int i = 0; i < vehicles.size(); i++)
-    		while (!A.isValid())
+    	for (int i = 0; i < vehicles.size(); i++) {
+    		do {
     			Collections.shuffle(A.getOrders().get(i));
+    		} while (!A.isValid());
+    	}
     	
     	return A;
     }
     
     private Assignment localChoice(List<Assignment> N) {
-    	Assignment bestA = null;
     	double cost, bestCost = 0;
 		List<Assignment> candidates = new ArrayList<Assignment>();
     	Random random = new Random();
@@ -142,7 +143,6 @@ public class CentralizedAgent implements CentralizedBehavior {
     		if (candidates.size() == 0 || cost < bestCost) {
     			candidates = new ArrayList<Assignment>();
     			bestCost = cost;
-    			//System.out.println(cost);
     		}
     		
     		if (cost == bestCost)
