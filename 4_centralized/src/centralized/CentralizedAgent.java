@@ -88,11 +88,19 @@ public class CentralizedAgent implements CentralizedBehavior {
     	Assignment oldA, A = selectInitialSolution(vehicles, tasks);
     	List<Assignment> N;
     	
-    	for (int i = 0; i < n_iterations; i++) {
-    		if (i % 100 == 0)
-    			System.out.println("Iteration " + i);
+    	for (int i = 0; i < n_iterations; i++) {   
+    		oldA = A;
+    		N = A.chooseNeighbors();
+    		A = this.localChoice(N);
     		
-    		A = this.localChoice(A.chooseNeighbors());
+    		if (A == null)
+    			A = oldA;
+    		
+    		System.out.print("Iteration " + i + " : " + N.size() + " neighbors / ");
+    		for (int j = 0; j < vehicles.size(); j++)
+    			System.out.print(A.getOrders().get(j).size() + " ");
+    		
+    		System.out.println();
     	}
     	
     	return A.getPlans();
@@ -123,20 +131,24 @@ public class CentralizedAgent implements CentralizedBehavior {
     private Assignment localChoice(List<Assignment> N) {
     	Assignment bestA = null;
     	double cost, bestCost = 0;
+		List<Assignment> candidates = new ArrayList<Assignment>();
     	Random random = new Random();
     	
     	if (random.nextFloat() <= this.proba_random)
-    		return N.get(random.nextInt(N.size()));
+    		return null;
     	
     	for (Assignment A : N) {
     		cost = A.getCost();
     		
     		if (bestA == null || cost < bestCost) {
-    			bestA = A;
+    			candidates = new ArrayList<Assignment>();
     			bestCost = cost;
     		}
+    		
+    		if (cost == bestCost)
+    			candidates.add(A);
     	}
     	
-    	return bestA;
+    	return candidates.get(random.nextInt(candidates.size()));
     }
 }
