@@ -116,7 +116,7 @@ public class CentralizedAgent implements CentralizedBehavior {
     	// Assign all tasks to a random vehicle
     	for (int i = 0; i < A.getTasks().size(); i++){
     		int random_vehicle = random.nextInt(vehicles.size());
-    		A.addTask(random_vehicle, i);
+    		A.addTask(random_vehicle, i, 0);
     	}
     	
     	// Shuffle all vehicles
