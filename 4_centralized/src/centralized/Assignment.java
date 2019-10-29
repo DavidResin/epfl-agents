@@ -3,6 +3,7 @@ package centralized;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -98,8 +99,8 @@ public class Assignment {
 	}
 
 	// Move the first task of the src vehicle to the dst vehicle
-	public Assignment changingVehicle(int v_src_id, int v_dst_id) {
-		int t_id = this.orders.get(v_src_id).get(0);
+	public Assignment changingVehicle(int v_src_id, int v_dst_id, int t_id) {
+		//int t_id = this.orders.get(v_src_id).get(i);
 
 		Assignment newA = this.deepCopy();
 		newA.remTask(v_src_id, t_id);
@@ -120,14 +121,14 @@ public class Assignment {
     	
     	// Changing vehicle
     	for (int v_dst_id = 0; v_dst_id < vehicles.size(); v_dst_id++) {
-    		int t_id = order.get(0);
-    		
-    		if (v_src_id != v_dst_id && vehicles.get(v_dst_id).capacity() >= tasks.get(t_id).weight) {
-    			Assignment temp = changingVehicle(v_src_id, v_dst_id);
-    			
-    			if (temp.isValid()){
-    				N.add(temp);
-    			}
+    		for(int t_id : new HashSet<Integer>(order)){
+    			if (v_src_id != v_dst_id && vehicles.get(v_dst_id).capacity() >= tasks.get(t_id).weight) {
+        			Assignment temp = changingVehicle(v_src_id, v_dst_id, t_id);
+        			
+        			if (temp.isValid()){
+        				N.add(temp);
+        			}
+        		}
     		}
     	}
     	
