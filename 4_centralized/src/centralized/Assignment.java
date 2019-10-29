@@ -15,19 +15,19 @@ import logist.topology.Topology.City;
 public class Assignment {
 	private final List<Task> tasks;
 	private final List<Vehicle> vehicles;
-	
-	private List<List<Integer>> orders; // Map from a vehicle id to a list of task ids (pickup and deliveries)
+	private final List<List<Integer>> orders; // Map from a vehicle id to a list of task ids (pickup and deliveries)
 	
 	public Assignment(TaskSet tasks, List<Vehicle> vehicles){
 		this.tasks = new ArrayList<Task>();
-    	for(Task task : tasks){
+		
+    	for (Task task : tasks)
     		this.tasks.add(task);
-    	}
+    		
 		this.vehicles = vehicles;
 		this.orders = new ArrayList<List<Integer>>(vehicles.size());
-		for(int i = 0; i < vehicles.size(); i++){
+		
+		for (int i = 0; i < vehicles.size(); i++)
 			this.orders.add(new ArrayList<Integer>());
-		}
 	}
 
 	public Assignment(List<Task> tasks, List<Vehicle> vehicles, List<List<Integer>> orders) {
@@ -63,7 +63,7 @@ public class Assignment {
 					nextCity = tasks.get(action).pickupCity;
 				}
 				
-				sum += cpkm * currCity.distanceUnitsTo(nextCity);
+				sum += cpkm * currCity.distanceTo(nextCity);
 				currCity = nextCity;
 			}
 		}
@@ -103,11 +103,15 @@ public class Assignment {
 	}
     
     public List<Assignment> chooseNeighbors() {
-    	Random random = new Random();
-    	int v_src_id = random.nextInt(vehicles.size());
-    	
-    	List<Integer> order = orders.get(v_src_id);
+    	int v_src_id;
+    	List<Integer> order; 
     	List<Assignment> N = new ArrayList<Assignment>();
+    	Random random = new Random();
+    	
+    	do {
+    		v_src_id = random.nextInt(vehicles.size());
+        	order = orders.get(v_src_id);
+    	} while (order.size() == 0);
     	
     	// Changing vehicle
     	for (int v_dst_id = 0; v_dst_id < vehicles.size(); v_dst_id++) {
@@ -134,6 +138,9 @@ public class Assignment {
     			}
     		}
     	}
+    	
+    	if (N.isEmpty())
+    		N.add(this);
     	
     	return N;
     }
@@ -237,10 +244,6 @@ public class Assignment {
 
 	public List<List<Integer>> getOrders() {
 		return orders;
-	}
-
-	public void setOrders(List<List<Integer>> orders) {
-		this.orders = orders;
 	}
 
 	public List<Task> getTasks() {

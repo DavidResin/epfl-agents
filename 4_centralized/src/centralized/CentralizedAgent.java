@@ -88,8 +88,12 @@ public class CentralizedAgent implements CentralizedBehavior {
     	Assignment oldA, A = selectInitialSolution(vehicles, tasks);
     	List<Assignment> N;
     	
-    	for (int i = 0; i < n_iterations; i++)
+    	for (int i = 0; i < n_iterations; i++) {
+    		if (i % 100 == 0)
+    			System.out.println("Iteration " + i);
+    		
     		A = this.localChoice(A.chooseNeighbors());
+    	}
     	
     	return A.getPlans();
     }
@@ -118,7 +122,7 @@ public class CentralizedAgent implements CentralizedBehavior {
     
     private Assignment localChoice(List<Assignment> N) {
     	Assignment bestA = null;
-    	double bestCost = 0, cost;
+    	double cost, bestCost = 0;
     	Random random = new Random();
     	
     	if (random.nextFloat() <= this.proba_random)
