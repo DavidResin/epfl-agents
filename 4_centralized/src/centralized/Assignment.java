@@ -84,6 +84,7 @@ public class Assignment {
 	
 	public void addTask(int v_id, int t_id) {
 		List<Integer> moving = Arrays.asList(new Integer[]{t_id, t_id});
+		
 		this.orders.get(v_id).addAll(0, moving);
 	}
 	
@@ -94,8 +95,6 @@ public class Assignment {
 
 	// Move the first task of the src vehicle to the dst vehicle
 	public Assignment changingVehicle(int v_src_id, int v_dst_id, int t_id) {
-		//int t_id = this.orders.get(v_src_id).get(i);
-
 		Assignment newA = this.deepCopy();
 		newA.remTask(v_src_id, t_id);
 		newA.addTask(v_dst_id, t_id);
