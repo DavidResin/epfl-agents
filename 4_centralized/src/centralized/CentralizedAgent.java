@@ -120,10 +120,11 @@ public class CentralizedAgent implements CentralizedBehavior {
     	}
     	
     	// Shuffle all vehicles
-    	for (int i = 0; i < vehicles.size(); i++)
-    		do{
+    	for (int i = 0; i < vehicles.size(); i++) {
+    		do {
     			Collections.shuffle(A.getOrders().get(i));
-    		}while (!A.isValid());
+    		} while (!A.isValid());
+    	}
     	
     	return A;
     }

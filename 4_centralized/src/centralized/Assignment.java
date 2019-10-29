@@ -84,6 +84,7 @@ public class Assignment {
 	
 	public void addTask(int v_id, int t_id) {
 		List<Integer> moving = Arrays.asList(new Integer[]{t_id, t_id});
+		
 		this.orders.get(v_id).addAll(0, moving);
 		
 		//this.orders.get(v_id).add(t_id);
@@ -99,8 +100,8 @@ public class Assignment {
 	}
 
 	// Move the first task of the src vehicle to the dst vehicle
-	public Assignment changingVehicle(int v_src_id, int v_dst_id, int t_id) {
-		//int t_id = this.orders.get(v_src_id).get(i);
+	public Assignment changingVehicle(int v_src_id, int v_dst_id, int i) {
+		int t_id = this.orders.get(v_src_id).get(i);
 
 		Assignment newA = this.deepCopy();
 		newA.remTask(v_src_id, t_id);
@@ -121,9 +122,10 @@ public class Assignment {
     	
     	// Changing vehicle
     	for (int v_dst_id = 0; v_dst_id < vehicles.size(); v_dst_id++) {
-    		for(int t_id : new HashSet<Integer>(order)){
+    		for(int i = 0; i < order.size(); i++){
+    			int t_id = order.get(i);
     			if (v_src_id != v_dst_id && vehicles.get(v_dst_id).capacity() >= tasks.get(t_id).weight) {
-        			Assignment temp = changingVehicle(v_src_id, v_dst_id, t_id);
+        			Assignment temp = changingVehicle(v_src_id, v_dst_id, i);
         			
         			if (temp.isValid()){
         				N.add(temp);
