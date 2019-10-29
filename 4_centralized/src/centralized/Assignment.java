@@ -146,7 +146,7 @@ public class Assignment {
     }
 	
 	private boolean isValid() {
-		List<Boolean> presence = new ArrayList<Boolean>(Collections.nCopies(60, false));
+		List<Boolean> presence = new ArrayList<Boolean>(Collections.nCopies(tasks.size(), false));
 		
 		for (int i = 0; i < vehicles.size(); i++) {
 			List<Integer> order = this.orders.get(i);
@@ -178,11 +178,11 @@ public class Assignment {
 					if (load > vehicles.get(i).capacity())
 						return false;
 				}
-				
-				// Test if tasks left in vehicle
-				if (!picked.isEmpty())
-					return false;
 			}
+
+			// Test if tasks left in vehicle
+			if (!picked.isEmpty())
+				return false;
 		}
 		
 		// Test if one task is untouched
