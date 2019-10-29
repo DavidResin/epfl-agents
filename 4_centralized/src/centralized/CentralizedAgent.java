@@ -27,23 +27,27 @@ import logist.topology.Topology.City;
  */
 @SuppressWarnings("unused")
 public class CentralizedAgent implements CentralizedBehavior {
-
+	
+	private static final double PROBA_RANDOM = .5;
+	private static final int N_ITERATIONS = 10000;
+	
     private Topology topology;
     private TaskDistribution distribution;
     private Agent agent;
     private long timeout_setup;
     private long timeout_plan;
+    private double proba_random;
+    private int n_iterations;
     
     @Override
-    public void setup(Topology topology, TaskDistribution distribution,
-            Agent agent) {
+    public void setup(Topology topology, TaskDistribution distribution, Agent agent) {
         
         // this code is used to get the timeouts
         LogistSettings ls = null;
+        
         try {
             ls = Parsers.parseSettings("config" + File.separator + "settings_default.xml");
-        }
-        catch (Exception exc) {
+        } catch (Exception exc) {
             System.out.println("There was a problem loading the configuration file.");
         }
         
@@ -51,6 +55,10 @@ public class CentralizedAgent implements CentralizedBehavior {
         timeout_setup = ls.get(LogistSettings.TimeoutKey.SETUP);
         // the plan method cannot execute more than timeout_plan milliseconds
         timeout_plan = ls.get(LogistSettings.TimeoutKey.PLAN);
+        // the probability of localChoice to go for a random assignment is proba_random
+        proba_random = PROBA_RANDOM;
+        // the amound of iterations for the CSPPlan is n_iterations
+        n_iterations = N_ITERATIONS;
         
         this.topology = topology;
         this.distribution = distribution;
@@ -71,16 +79,17 @@ public class CentralizedAgent implements CentralizedBehavior {
     }
     
     private List<Plan> CSPPlan(List<Vehicle> vehicles, TaskSet tasks) {
-    	// TODO
-    	// need stopping criteria
-    	// uses selectInitialSolution() and localChoice()
     	System.out.println(vehicles);
     	
     	for (Task task : tasks)
     		System.out.println(task);
     	
     	// Get the initial solution
-    	Assignment A = selectInitialSolution(vehicles, tasks);
+    	Assignment oldA, A = selectInitialSolution(vehicles, tasks);
+    	List<Assignment> N;
+    	
+    	for (int i = 0; i < n_iterations; i++)
+    		A = this.localChoice(A.chooseNeighbors());
     	
     	return A.getPlans();
     }
@@ -107,12 +116,12 @@ public class CentralizedAgent implements CentralizedBehavior {
     	return A;
     }
     
-    private Assignment localChoice(List<Assignment> N, Double proba) {
+    private Assignment localChoice(List<Assignment> N) {
     	Assignment bestA = null;
-    	double bestCost, cost;
+    	double bestCost = 0, cost;
     	Random random = new Random();
     	
-    	if (random.nextFloat() > proba)
+    	if (random.nextFloat() <= this.proba_random)
     		return N.get(random.nextInt(N.size()));
     	
     	for (Assignment A : N) {

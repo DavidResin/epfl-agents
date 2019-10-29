@@ -113,16 +113,27 @@ public class Assignment {
     	for (int v_dst_id = 0; v_dst_id < vehicles.size(); v_dst_id++) {
     		int t_id = order.get(0);
     		
-    		if (v_src_id != v_dst_id && vehicles.get(v_dst_id).capacity() >= tasks.get(t_id).weight)
-    			N.add(changingVehicle(v_src_id, v_dst_id));
+    		if (v_src_id != v_dst_id && vehicles.get(v_dst_id).capacity() >= tasks.get(t_id).weight) {
+    			Assignment temp = changingVehicle(v_src_id, v_dst_id);
+    			
+    			if (temp.isValid())
+    				N.add(temp);
+    		}
     	}
     	
     	// Changing task order
-    	if (order.size() > 2)
-    		for (int t1_id : order)
-    			for (int t2_id : order)
-    				if (t1_id != t2_id)
-    					N.add(changingTaskOrder(v_src_id, t1_id, t2_id));
+    	if (order.size() > 2) {
+    		for (int t1_id : order) {
+    			for (int t2_id : order) {
+    				if (t1_id != t2_id) {
+    					Assignment temp = changingTaskOrder(v_src_id, t1_id, t2_id);
+		
+						if (temp.isValid())
+							N.add(temp);
+    				}
+    			}
+    		}
+    	}
     	
     	return N;
     }
