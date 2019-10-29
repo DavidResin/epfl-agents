@@ -145,7 +145,7 @@ public class Assignment {
     	return N;
     }
 	
-	private boolean isValid() {
+	public boolean isValid() {
 		List<Boolean> presence = new ArrayList<Boolean>(Collections.nCopies(tasks.size(), false));
 		
 		for (int i = 0; i < vehicles.size(); i++) {

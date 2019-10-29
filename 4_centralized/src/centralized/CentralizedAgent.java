@@ -3,6 +3,7 @@ package centralized;
 import java.io.File;
 //the list of imports
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import logist.LogistSettings;
@@ -88,7 +89,7 @@ public class CentralizedAgent implements CentralizedBehavior {
     	Assignment oldA, A = selectInitialSolution(vehicles, tasks);
     	List<Assignment> N;
     	
-    	for (int i = 0; i < n_iterations; i++) {   
+    	/*for (int i = 0; i < n_iterations; i++) {   
     		oldA = A;
     		N = A.chooseNeighbors();
     		A = this.localChoice(N);
@@ -101,7 +102,7 @@ public class CentralizedAgent implements CentralizedBehavior {
     			System.out.print(A.getOrders().get(j).size() + " ");
     		
     		System.out.println();
-    	}
+    	}*/
     	
     	return A.getPlans();
     }
@@ -110,20 +111,20 @@ public class CentralizedAgent implements CentralizedBehavior {
     	// Create an empty assignment
     	Assignment A = new Assignment(tasks, vehicles);
     	
-    	// Get the largest vehicle
-    	int largestVehicleIndex = 0;
-    	int largestCapacity = 0;
+    	Random random = new Random();
     	
-    	for (int i = 0; i < A.getVehicles().size(); i++) {
-    		if (A.getVehicles().get(i).capacity() > largestCapacity) {
-    			largestCapacity = A.getVehicles().get(i).capacity();
-    			largestVehicleIndex = i;
-    		}
+    	// Assign all tasks to a random vehicle
+    	for (int i = 0; i < A.getTasks().size(); i++){
+    		int random_vehicle = random.nextInt(vehicles.size());
+    		A.addTask(random_vehicle, i);
     	}
     	
-    	// Assign all tasks to this vehicle
-    	for (int i = 0; i < A.getTasks().size(); i++)
-    		A.addTask(largestVehicleIndex, i);
+    	// Shuffle all vehicles
+    	for(int i = 0; i < vehicles.size(); i ++){
+    		do{
+    			Collections.shuffle(A.getOrders().get(i));
+    		}while(!A.isValid());
+    	}
     	
     	return A;
     }
