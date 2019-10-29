@@ -100,7 +100,7 @@ public class CentralizedAgent implements CentralizedBehavior {
     		System.out.print("Iteration " + i + " : " + N.size() + " neighbors / ");
     		for (int j = 0; j < vehicles.size(); j++)
     			System.out.print(A.getOrders().get(j).size() + " ");
-    		
+    		System.out.print(" / " + A.getCost() + " / " + (oldA.getCost() - A.getCost()));
     		System.out.println();
     	}
     	
@@ -139,9 +139,10 @@ public class CentralizedAgent implements CentralizedBehavior {
     	for (Assignment A : N) {
     		cost = A.getCost();
     		
-    		if (bestA == null || cost < bestCost) {
+    		if (candidates.size() == 0 || cost < bestCost) {
     			candidates = new ArrayList<Assignment>();
     			bestCost = cost;
+    			//System.out.println(cost);
     		}
     		
     		if (cost == bestCost)
