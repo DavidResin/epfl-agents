@@ -83,12 +83,18 @@ public class Assignment {
 	
 	public void addTask(int v_id, int t_id) {
 		List<Integer> moving = Arrays.asList(new Integer[]{t_id, t_id});
-		this.orders.get(v_id).addAll(0, moving);
+		//this.orders.get(v_id).addAll(0, moving);
+		
+		this.orders.get(v_id).add(t_id);
+		this.orders.get(v_id).add(t_id);
 	}
 	
 	public void remTask(int v_id, int t_id) {
 		List<Integer> moving = Arrays.asList(new Integer[]{t_id, t_id});
-		this.orders.get(v_id).removeAll(moving);
+		//this.orders.get(v_id).removeAll(moving);
+		
+		this.orders.get(v_id).remove(this.orders.get(v_id).indexOf(t_id));
+		this.orders.get(v_id).remove(this.orders.get(v_id).indexOf(t_id));
 	}
 
 	// Move the first task of the src vehicle to the dst vehicle
@@ -127,9 +133,9 @@ public class Assignment {
     	
     	// Changing task order
     	if (order.size() > 2) {
-    		for (int t1_id : order) {
-    			for (int t2_id : order) {
-    				if (t1_id != t2_id) {
+    		for (int t1_id = 0 ; t1_id < order.size(); t1_id++) {
+    			for (int t2_id = 0; t2_id < order.size(); t2_id++) {
+    				if (order.get(t1_id) != order.get(t2_id)) {
     					Assignment temp = changingTaskOrder(v_src_id, t1_id, t2_id);
 		
 						if (temp.isValid())
