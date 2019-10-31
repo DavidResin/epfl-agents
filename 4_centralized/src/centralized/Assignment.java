@@ -82,10 +82,9 @@ public class Assignment {
     	return newA;
     }
 	
-	public void addTask(int v_id, int t_id) {
+	public void addTask(int v_id, int t_id, int position) {
 		List<Integer> moving = Arrays.asList(new Integer[]{t_id, t_id});
-		
-		this.orders.get(v_id).addAll(0, moving);
+		this.orders.get(v_id).addAll(position, moving);
 	}
 	
 	public void remTask(int v_id, int t_id) {
@@ -97,7 +96,10 @@ public class Assignment {
 	public Assignment changingVehicle(int v_src_id, int v_dst_id, int t_id) {
 		Assignment newA = this.deepCopy();
 		newA.remTask(v_src_id, t_id);
-		newA.addTask(v_dst_id, t_id);
+		Random random = new Random();
+		//newA.addTask(v_dst_id, t_id, random.nextInt(this.orders.get(v_dst_id).size() + 1));
+		newA.orders.get(v_dst_id).add(random.nextInt(this.orders.get(v_dst_id).size() + 1), t_id);
+		newA.orders.get(v_dst_id).add(random.nextInt(this.orders.get(v_dst_id).size() + 1), t_id);
 		return newA;
 	}
     

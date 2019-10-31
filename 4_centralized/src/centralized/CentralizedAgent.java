@@ -31,6 +31,7 @@ public class CentralizedAgent implements CentralizedBehavior {
 	
 	private static final double PROBA_RANDOM = .5;
 	private static final int N_ITERATIONS = 10000;
+	private static final boolean DO_SHUFFLE = true;
 
     private Topology topology;
     private TaskDistribution distribution;
@@ -39,6 +40,7 @@ public class CentralizedAgent implements CentralizedBehavior {
     private long timeout_plan;
     private double proba_random;
     private int n_iterations;
+    private boolean do_shuffle;
     
     @Override
     public void setup(Topology topology, TaskDistribution distribution, Agent agent) {
@@ -60,6 +62,8 @@ public class CentralizedAgent implements CentralizedBehavior {
         proba_random = PROBA_RANDOM;
         // the amound of iterations for the CSPPlan is n_iterations
         n_iterations = N_ITERATIONS;
+        // whether or not to shuffle tasks across vehicles for the initial solution
+        do_shuffle = DO_SHUFFLE;
         
         this.topology = topology;
         this.distribution = distribution;
@@ -116,7 +120,7 @@ public class CentralizedAgent implements CentralizedBehavior {
     	// Assign all tasks to a random vehicle
     	for (int i = 0; i < A.getTasks().size(); i++){
     		int random_vehicle = random.nextInt(vehicles.size());
-    		A.addTask(random_vehicle, i);
+    		A.addTask(random_vehicle, i, 0);
     	}
     	
     	// Shuffle all vehicles
