@@ -29,7 +29,7 @@ import logist.topology.Topology.City;
 @SuppressWarnings("unused")
 public class CentralizedAgent implements CentralizedBehavior {
 	
-	private static final double PROBA_RANDOM = .5;
+	private static final double PROBA_RANDOM = .3;
 	private static final int N_ITERATIONS = 10000;
 	
     private Topology topology;

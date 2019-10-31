@@ -99,15 +99,14 @@ public class Assignment {
 	}
 
 	// Move the first task of the src vehicle to the dst vehicle
-	public Assignment changingVehicle(int v_src_id, int v_dst_id, int i) {
+	public Assignment changingVehicle(int v_src_id, int v_dst_id, int i, int location1, int location2) {
 		int t_id = this.orders.get(v_src_id).get(i);
 
 		Assignment newA = this.deepCopy();
 		newA.remTask(v_src_id, t_id);
-		Random random = new Random();
 		//newA.addTask(v_dst_id, t_id, random.nextInt(this.orders.get(v_dst_id).size() + 1));
-		newA.orders.get(v_dst_id).add(random.nextInt(this.orders.get(v_dst_id).size() + 1), t_id);
-		newA.orders.get(v_dst_id).add(random.nextInt(this.orders.get(v_dst_id).size() + 1), t_id);
+		newA.orders.get(v_dst_id).add(location1, t_id);
+		newA.orders.get(v_dst_id).add(location2, t_id);
 		return newA;
 	}
     
@@ -127,11 +126,16 @@ public class Assignment {
     		for(int i = 0; i < order.size(); i++){
     			int t_id = order.get(i);
     			if (v_src_id != v_dst_id && vehicles.get(v_dst_id).capacity() >= tasks.get(t_id).weight) {
-        			Assignment temp = changingVehicle(v_src_id, v_dst_id, i);
-        			
-        			if (temp.isValid()){
-        				N.add(temp);
-        			}
+    				//int location1 = random.nextInt(this.orders.get(v_dst_id).size() + 1);
+    				//int location2 = random.nextInt(this.orders.get(v_dst_id).size() + 2);
+    				for(int location1 = 0; location1 <= orders.get(v_dst_id).size(); location1++){
+    					for(int location2 = 0; location2 <= orders.get(v_dst_id).size() +1; location2++){
+    						Assignment temp = changingVehicle(v_src_id, v_dst_id, i, location1, location2);
+    						if (temp.isValid()){
+    	        				N.add(temp);
+    	        			}
+    					}
+    				}
         		}
     		}
     	}
@@ -148,6 +152,32 @@ public class Assignment {
     				}
     			}
     		}
+    	}
+    	
+    	// Random shuffle within vehicle
+    	Assignment temp = this.deepCopy();
+    	Collections.shuffle(temp.getOrders().get(v_src_id));
+    	if(temp.isValid())
+    		N.add(temp);
+    	
+    	// Shuffle a random number of tasks towards another vehicle
+    	temp = this.deepCopy();
+    	int numTaskShuffle = random.nextInt(order.size()/2);
+    	for(int i = 0; i < numTaskShuffle; i++){
+    		int t_id = temp.getOrders().get(v_src_id).get(random.nextInt(temp.getOrders().get(v_src_id).size()));
+    		int v_dst_id = 0;
+    		do {
+    			v_dst_id = random.nextInt(temp.getVehicles().size());
+    		} while(v_dst_id == v_src_id);
+    		temp.remTask(v_src_id, t_id);
+    		int location1 = random.nextInt(this.orders.get(v_dst_id).size() + 1);
+			int location2 = random.nextInt(this.orders.get(v_dst_id).size() + 2);
+    		temp.orders.get(v_dst_id).add(location1, t_id);
+    		temp.orders.get(v_dst_id).add(location2, t_id);
+    	}
+    	
+    	if(temp.isValid()){
+    		N.add(temp);
     	}
     	
     	if (N.isEmpty())
