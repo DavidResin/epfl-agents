@@ -13,7 +13,7 @@ import logist.task.Task;
 import logist.task.TaskSet;
 import logist.topology.Topology.City;
 
-public class Assignment {
+public class Assignment implements Comparable<Assignment> {
 	private final List<Task> tasks;
 	private final List<Vehicle> vehicles;
 	private final List<List<Integer>> orders; // Map from a vehicle id to a list of task ids (pickup and deliveries)
@@ -82,9 +82,15 @@ public class Assignment {
     	return newA;
     }
 	
+    /*
 	public void addTask(int v_id, int t_id, int position) {
 		List<Integer> moving = Arrays.asList(new Integer[]{t_id, t_id});
 		this.orders.get(v_id).addAll(position, moving);
+	}*/
+	
+	public void addTask(int v_id, int t_id) {
+		List<Integer> moving = Arrays.asList(new Integer[]{t_id, t_id});
+		this.orders.get(v_id).addAll(0, moving);
 	}
 	
 	public void remTask(int v_id, int t_id) {
@@ -92,16 +98,30 @@ public class Assignment {
 		this.orders.get(v_id).removeAll(moving);
 	}
 
+	
 	// Move the first task of the src vehicle to the dst vehicle
-	public Assignment changingVehicle(int v_src_id, int v_dst_id, int t_id) {
+	public Assignment changingVehicle(int v_src_id, int v_dst_id) {
+		int t_id = this.orders.get(v_src_id).get(0);
+
 		Assignment newA = this.deepCopy();
 		newA.remTask(v_src_id, t_id);
-		Random random = new Random();
-		//newA.addTask(v_dst_id, t_id, random.nextInt(this.orders.get(v_dst_id).size() + 1));
-		newA.orders.get(v_dst_id).add(random.nextInt(this.orders.get(v_dst_id).size() + 1), t_id);
-		newA.orders.get(v_dst_id).add(random.nextInt(this.orders.get(v_dst_id).size() + 1), t_id);
+		newA.addTask(v_dst_id, t_id);
+		
 		return newA;
 	}
+	
+	/*
+	// Move the first task of the src vehicle to the dst vehicle
+	public Assignment changingVehicle(int v_src_id, int v_dst_id, int i, int location1, int location2) {
+		int t_id = this.orders.get(v_src_id).get(i);
+
+		Assignment newA = this.deepCopy();
+		newA.remTask(v_src_id, t_id);
+		//newA.addTask(v_dst_id, t_id, random.nextInt(this.orders.get(v_dst_id).size() + 1));
+		newA.orders.get(v_dst_id).add(location1, t_id);
+		newA.orders.get(v_dst_id).add(location2, t_id);
+		return newA;
+	}*/
     
     public List<Assignment> chooseNeighbors() {
     	int v_src_id;
@@ -114,15 +134,33 @@ public class Assignment {
         	order = orders.get(v_src_id);
     	} while (order.size() == 0);
     	
-    	// Changing vehicle
+    	/*// Changing vehicle
     	for (int v_dst_id = 0; v_dst_id < vehicles.size(); v_dst_id++) {
     		for (int t_id : new HashSet<Integer>(order)) {
     			if (v_src_id != v_dst_id && vehicles.get(v_dst_id).capacity() >= tasks.get(t_id).weight) {
-        			Assignment temp = changingVehicle(v_src_id, v_dst_id, t_id);
-        			
-        			if (temp.isValid())
-        				N.add(temp);
+    				//int location1 = random.nextInt(this.orders.get(v_dst_id).size() + 1);
+    				//int location2 = random.nextInt(this.orders.get(v_dst_id).size() + 2);
+    				for(int location1 = 0; location1 <= orders.get(v_dst_id).size(); location1++){
+    					for(int location2 = 0; location2 <= orders.get(v_dst_id).size() +1; location2++){
+    						Assignment temp = changingVehicle(v_src_id, v_dst_id, t_id, location1, location2);
+    						if (temp.isValid()){
+    	        				N.add(temp);
+    	        			}
+    					}
+    				}
         		}
+    		}
+    	}*/
+    	
+    	// Changing vehicle
+    	for (int v_dst_id = 0; v_dst_id < vehicles.size(); v_dst_id++) {
+    		int t_id = order.get(0);
+    		
+    		if (v_src_id != v_dst_id && vehicles.get(v_dst_id).capacity() >= tasks.get(t_id).weight) {
+    			Assignment temp = changingVehicle(v_src_id, v_dst_id);
+    			
+    			if (temp.isValid())
+    				N.add(temp);
     		}
     	}
     	
@@ -138,6 +176,32 @@ public class Assignment {
     				}
     			}
     		}
+    	}
+    	
+    	// Random shuffle within vehicle
+    	Assignment temp = this.deepCopy();
+    	Collections.shuffle(temp.getOrders().get(v_src_id));
+    	if(temp.isValid())
+    		N.add(temp);
+    	
+    	// Shuffle a random number of tasks towards another vehicle
+    	temp = this.deepCopy();
+    	int numTaskShuffle = random.nextInt(order.size()/2);
+    	for(int i = 0; i < numTaskShuffle; i++){
+    		int t_id = temp.getOrders().get(v_src_id).get(random.nextInt(temp.getOrders().get(v_src_id).size()));
+    		int v_dst_id = 0;
+    		do {
+    			v_dst_id = random.nextInt(temp.getVehicles().size());
+    		} while(v_dst_id == v_src_id);
+    		temp.remTask(v_src_id, t_id);
+    		int location1 = random.nextInt(this.orders.get(v_dst_id).size() + 1);
+			int location2 = random.nextInt(this.orders.get(v_dst_id).size() + 2);
+    		temp.orders.get(v_dst_id).add(location1, t_id);
+    		temp.orders.get(v_dst_id).add(location2, t_id);
+    	}
+    	
+    	if(temp.isValid()){
+    		N.add(temp);
     	}
     	
     	if (N.isEmpty())
@@ -261,5 +325,11 @@ public class Assignment {
 			out += "Vehicle " + i + ": " + this.orders.get(i) + "\n";
 		}
 		return out;
+	}
+
+	@Override
+	public int compareTo(Assignment o) {
+		// TODO Auto-generated method stub
+		return (int) (this.getCost() - o.getCost());
 	}
 }

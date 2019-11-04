@@ -29,7 +29,7 @@ import logist.topology.Topology.City;
 @SuppressWarnings("unused")
 public class CentralizedAgent implements CentralizedBehavior {
 	
-	private static final double PROBA_RANDOM = .5;
+	private static final double PROBA_RANDOM = .3;
 	private static final int N_ITERATIONS = 10000;
 	private static final boolean DO_SHUFFLE = true;
 
@@ -74,7 +74,8 @@ public class CentralizedAgent implements CentralizedBehavior {
     public List<Plan> plan(List<Vehicle> vehicles, TaskSet tasks) {
         long time_start = System.currentTimeMillis();
         
-        List<Plan> plans = CSPPlan(vehicles, tasks);
+        //List<Plan> plans = CSPPlan(vehicles, tasks);
+        List<Plan> plans = CSPMultiplePlan(vehicles, tasks, 10, 1000);
         
         long time_end = System.currentTimeMillis();
         long duration = time_end - time_start;
@@ -111,6 +112,53 @@ public class CentralizedAgent implements CentralizedBehavior {
     	return A.getPlans();
     }
     
+    private List<Plan> CSPMultiplePlan(List<Vehicle> vehicles, TaskSet tasks, int stages, int iterations) {
+    	System.out.println(vehicles);
+    	
+    	for (Task task : tasks)
+    		System.out.println(task);
+    	
+    	List<Assignment> As = new ArrayList<Assignment>();
+    	
+    	for (int i = 0; i < Math.pow(2, stages); i++)
+    		As.add(selectInitialSolution(vehicles, tasks));
+    	
+    	for (int s = 0; s < stages; s++) {
+    		List<Assignment> newAs = new ArrayList<Assignment>();
+    		
+    		for (Assignment A : As) {
+    			Assignment newA = A;
+    		
+    			for (int i = 0; i < iterations / Math.pow(2, stages - s - 1); i++)
+    				newA = iterate(newA, i);
+    				
+    			newAs.add(newA);
+    		}
+    		
+    		Collections.sort(newAs);
+    		As = newAs.subList(0, (int) (Math.pow(2, stages - s - 1)));
+    	}
+    	
+    	System.out.println("Plan chosen: cost = " + As.get(0).getCost());
+    	return As.get(0).getPlans();
+    }
+    
+    private Assignment iterate(Assignment A, int i) {
+    	List<Assignment> N = A.chooseNeighbors();
+    	Assignment newA = localChoice(N);
+    	
+    	if (newA == null)
+    		newA = A;
+    	
+    	System.out.print("Iteration " + i + " : " + N.size() + " neighbors / ");
+		for (List<Integer> o : newA.getOrders())
+			System.out.print(o.size() + " ");
+		System.out.print(" / " + newA.getCost() + " / " + (newA.getCost() - A.getCost()));
+		System.out.println();
+		
+		return newA;
+    }
+    
     private Assignment selectInitialSolution(List<Vehicle> vehicles, TaskSet tasks) {
     	// Create an empty assignment
     	Assignment A = new Assignment(tasks, vehicles);
@@ -120,7 +168,7 @@ public class CentralizedAgent implements CentralizedBehavior {
     	// Assign all tasks to a random vehicle
     	for (int i = 0; i < A.getTasks().size(); i++){
     		int random_vehicle = random.nextInt(vehicles.size());
-    		A.addTask(random_vehicle, i, 0);
+    		A.addTask(random_vehicle, i);
     	}
     	
     	// Shuffle all vehicles
