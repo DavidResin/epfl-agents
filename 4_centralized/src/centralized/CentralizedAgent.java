@@ -30,8 +30,8 @@ import logist.topology.Topology.City;
 public class CentralizedAgent implements CentralizedBehavior {
 	
 	private static final double PROBA_RANDOM = .3;
-	private static final int N_ITERATIONS = 10000;
-	private static final boolean DO_SHUFFLE = true;
+	private static final int N_ITERATIONS = 1600;
+	private static final int N_STAGES = 1;
 
     private Topology topology;
     private TaskDistribution distribution;
@@ -40,7 +40,7 @@ public class CentralizedAgent implements CentralizedBehavior {
     private long timeout_plan;
     private double proba_random;
     private int n_iterations;
-    private boolean do_shuffle;
+    private int n_stages;
     
     @Override
     public void setup(Topology topology, TaskDistribution distribution, Agent agent) {
@@ -62,8 +62,8 @@ public class CentralizedAgent implements CentralizedBehavior {
         proba_random = PROBA_RANDOM;
         // the amound of iterations for the CSPPlan is n_iterations
         n_iterations = N_ITERATIONS;
-        // whether or not to shuffle tasks across vehicles for the initial solution
-        do_shuffle = DO_SHUFFLE;
+        // the exponent of the amount of initial solution for CSPMultiplePlan (if it is 10, then the algorithm will start with 2^10 initial solutions and divide by 2 each time)
+        n_stages = N_STAGES;
         
         this.topology = topology;
         this.distribution = distribution;
@@ -75,7 +75,7 @@ public class CentralizedAgent implements CentralizedBehavior {
         long time_start = System.currentTimeMillis();
         
         //List<Plan> plans = CSPPlan(vehicles, tasks);
-        List<Plan> plans = CSPMultiplePlan(vehicles, tasks, 10, 1000);
+        List<Plan> plans = CSPMultiplePlan(vehicles, tasks, n_stages, n_iterations);
         
         long time_end = System.currentTimeMillis();
         long duration = time_end - time_start;
