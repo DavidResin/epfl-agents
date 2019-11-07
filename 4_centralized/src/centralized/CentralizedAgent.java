@@ -30,8 +30,8 @@ import logist.topology.Topology.City;
 public class CentralizedAgent implements CentralizedBehavior {
 	
 	private static final double PROBA_RANDOM = .3;
-	private static final int N_ITERATIONS = 1600;
-	private static final int N_STAGES = 1;
+	private static final int N_ITERATIONS = 2000;
+	private static final int N_STAGES = 8;
 
     private Topology topology;
     private TaskDistribution distribution;
