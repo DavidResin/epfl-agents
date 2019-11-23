@@ -255,10 +255,7 @@ public class AuctionAgent implements AuctionBehavior {
 							+ tasks_of_i.get(j).pickupCity.distanceTo(tasks_of_i.get(k).deliveryCity)
 							+ tasks_of_i.get(j).pickupCity.distanceTo(tasks_of_i.get(k).pickupCity);
 					
-			if (tasks_of_i.size() == 0)
-				accDis.add(0d);
-			else
-				accDis.add(total / tasks_of_i.size());
+			accDis.add(Math.sqrt(total));
 		}
 		
 		return accDis;
