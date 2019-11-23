@@ -260,7 +260,7 @@ public class AuctionAgent implements AuctionBehavior {
 	private List<Double> getAccumulatedDistances(Task extra_task) {
 		List<Double> accDis = new ArrayList<Double>();
 		
-		if (auction_winners.size() == 0)
+		if (firstTime())
 			return null;
 		
 		for (int i = 0; i < auction_bids.get(0).length; i++) {
