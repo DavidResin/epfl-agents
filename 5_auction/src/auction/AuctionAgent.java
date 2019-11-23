@@ -52,7 +52,7 @@ public class AuctionAgent implements AuctionBehavior {
 	private double current_cost;
 	
 	// All model parameters
-	private Double profitFactor = 1.0;
+	private Double profitFactor = 1.4;
 	private Double speculationFactor = 0.0;
 	private Double competitionFactor = 0.0;
 	private Double aggressivenessFactor = 1.0;
@@ -175,15 +175,25 @@ public class AuctionAgent implements AuctionBehavior {
 		for(Task task : tasks){
 			taskList.add(task);
 		}
-		System.out.println("Planning");
-		List<Plan> plans = Planning.CSPMultiplePlan(vehicles, taskList, 4, 1000);
-		System.out.println("Planned");
 		
-		double cost = 0.0;
-		for(int i = 0; i < agent.vehicles().size(); i++){
-			cost += plans.get(i).totalDistance() * agent.vehicles().get(i).costPerKm();
+		List<Plan> plans;
+		if(taskList.size() == 0){
+			plans = new ArrayList<Plan>();
+			for(int i = 0; i < vehicles.size(); i++){
+				plans.add(Plan.EMPTY);
+			}
+		}else{
+			plans = Planning.CSPMultiplePlan(vehicles, taskList, 4, 1000);
 		}
 		
+		double cost = 0.0;
+		
+		if(taskList.size() != 0){
+			for(int i = 0; i < agent.vehicles().size(); i++){
+				cost += plans.get(i).totalDistance() * agent.vehicles().get(i).costPerKm();
+			}
+		}
+
 		double profit = tasks.rewardSum() - cost;
 		System.out.println("Agent " + agent.id() + " | Total profit : " + profit);
 
