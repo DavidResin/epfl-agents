@@ -15,6 +15,7 @@ import logist.task.TaskDistribution;
 import logist.task.TaskSet;
 import logist.topology.Topology;
 import logist.topology.Topology.City;
+import auction.Planning;
 
 /**
  * A very simple auction agent that assigns all tasks to its first vehicle and
@@ -43,11 +44,15 @@ public class AuctionAgent implements AuctionBehavior {
 
 		long seed = -9019554669489983951L * currentCity.hashCode() * agent.id();
 		this.random = new Random(seed);
+		speculateFutureCost(null);
 	}
 
 	@Override
 	public void auctionResult(Task previous, int winner, Long[] bids) {
-		System.out.println(bids);
+		for(int i = 0; i < bids.length; i ++){
+			System.out.print(i + ": " + bids[i] + " ");
+		}
+		System.out.println();
 		if (winner == agent.id()) {
 			currentCity = previous.deliveryCity;
 		}
@@ -107,5 +112,38 @@ public class AuctionAgent implements AuctionBehavior {
 			current = task.deliveryCity;
 		}
 		return plan;
+	}
+	
+	private double speculateFutureCost(Task auctionedTask){
+		double totalFutureCost = 0.0;
+		
+		// Iterate over all the possible next tasks
+		for(City cityFrom : topology.cities()){
+			for(City cityTo : topology.cities()){
+				if(cityTo == cityFrom)
+					continue;
+				double cost = 0.0;
+				// Create the list of tasks in this speculated plan
+				List<Task> tasks = new ArrayList<Task>();
+				if(auctionedTask != null)
+					tasks.add(auctionedTask);
+				Task speculatedTask = new Task(0, cityFrom, cityTo, 0, distribution.weight(cityFrom, cityTo)); 
+				tasks.add(speculatedTask);
+				
+				// Compute a good plan for this task set
+				List<Plan> plans = Planning.CSPMultiplePlan(agent.vehicles(), tasks, 4, 1000);
+				
+				// Compute the cost of this plan
+				for(int i = 0; i < agent.vehicles().size(); i++){
+					cost += plans.get(i).totalDistance() * agent.vehicles().get(i).costPerKm();
+				}
+				System.out.println(auctionedTask + " / " + speculatedTask + " cost: " + cost);
+				
+				// Add this cost to the total cost, weighted by the probability that this task will be the next one
+				totalFutureCost += cost * distribution.probability(cityFrom, cityTo) / topology.cities().size();
+			}
+		}
+		
+		return totalFutureCost;
 	}
 }
