@@ -160,8 +160,6 @@ public class AuctionAgent implements AuctionBehavior {
 		return plan;
 	}
 	
-<<<<<<< HEAD
-=======
 	private double speculateFutureCost(Task auctionedTask){
 		double totalFutureCost = 0.0;
 		
@@ -194,8 +192,7 @@ public class AuctionAgent implements AuctionBehavior {
 		
 		return totalFutureCost;
 	}
-		
->>>>>>> 952d7f0cfaff72ccf18a4b6d22b4f9f1635d1d70
+	
 	// Returns the list of the current gains of each adversary (all rewards - all bids), ignoring the cost of fuel which is an uncertain value
 	private List<Double> getGains() {		
 		List<Double> gains = new ArrayList<Double>(Collections.nCopies(auction_bids.get(0).length, 0d));
