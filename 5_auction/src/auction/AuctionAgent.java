@@ -51,6 +51,12 @@ public class AuctionAgent implements AuctionBehavior {
 	// Cost of the optimal plan for delivering all tasks we have currently won
 	private double current_cost;
 	
+	// All model parameters
+	private Double profitFactor = 1.0;
+	private Double speculationFactor = 0.0;
+	private Double competitionFactor = 0.0;
+	private Double aggressivenessFactor = 0.0;
+	
 	private List<Plan> plans;
 
 	@Override
@@ -126,7 +132,6 @@ public class AuctionAgent implements AuctionBehavior {
 		// Predict the bid factor for all the agents
 		List<Double> distances = getAccumulatedDistances(previous);
 		Double[] latest_bid_factors = new Double[bids.length];
-		System.out.print("Bid factors:");
 		for(int i = 0; i < bids.length; i++){
 			if(distances.get(i) == 0){
 				// The agent had not won any tasks yet
@@ -135,9 +140,7 @@ public class AuctionAgent implements AuctionBehavior {
 			}else{
 				latest_bid_factors[i] = bids[i] / distances.get(i);
 			}
-			System.out.print(latest_bid_factors[i] + " ");
 		}
-		System.out.println();
 		bid_factors.add(latest_bid_factors);
 		
 	}
@@ -232,7 +235,7 @@ public class AuctionAgent implements AuctionBehavior {
 				// Check if we are not going overtime
 				long time_now = System.currentTimeMillis();
 				if(time_now - time_start > timeout_bid * 0.8){
-					return (Double) null;
+					return 0;
 				}
 			}
 		}
@@ -302,6 +305,9 @@ public class AuctionAgent implements AuctionBehavior {
 	}
 	
 	private List<Integer> getRankings() {
+		if(auction_winners.size() == 0){
+			return null;
+		}
 		List<Integer> ranks = new ArrayList<Integer>();
 		List<Double> totals = getEstimatedTotals();
 		Collections.sort(totals);
@@ -315,6 +321,10 @@ public class AuctionAgent implements AuctionBehavior {
 	// Returns a value from .75 (first) to 1.25 (last)
 	private double getRankingFactor() {
 		List<Integer> ranks = getRankings();		
+		
+		if(ranks == null){
+			return 0;
+		}
 		
 		if (ranks.size() < 2)
 			return 1;
@@ -386,20 +396,38 @@ public class AuctionAgent implements AuctionBehavior {
 		System.out.println("=====");
 		System.out.println("Agent " + agent.id() + " | Auctioned task : " + auctionedTask);
 		
+		// Compute the current rankings
+		List<Integer> rankings = getRankings();
+		System.out.println("Current estimated ranking: " + rankings);
+		if(auction_winners.size() != 0){
+			System.out.println("Estimated totals: " + getEstimatedTotals());
+		}
+		
 		// Compute the predicted bids of the other agents
 		List<Double> predicted_bids = getExpectedBid(auctionedTask);
 		System.out.println("Expected bids: " + predicted_bids);
 		
-		System.out.println("Current cost: " + current_cost);
+		// Get the lowest out of all these bids
+		double expectedBid = 0.0;
+		if(predicted_bids != null){
+			expectedBid = predicted_bids.get(0);
+			for(Double bid : predicted_bids){
+				if(bid < expectedBid)
+					expectedBid = bid;
+			}
+		}
+		
 		
 		// Compute the difference with the cost of delivering all tasks we have already won
+		System.out.println("Current cost: " + current_cost);
 		double cost = getExpectedCost(auctionedTask);
-		double difference = cost - current_cost;
-		System.out.println("Expected cost with auctioned task: " + cost + " | difference: " + difference);
+		double expectedCost = cost - current_cost;
+		System.out.println("Expected cost with auctioned task: " + cost + " | difference: " + expectedCost);
 		
 		// Compute the speculated value for the possible next plan
 		double speculatedFutureCost = speculateFutureCost(auctionedTask);
-		System.out.println("Speculated cost with new task: " + speculatedFutureCost + " | difference: " + (speculatedFutureCost - cost));
+		double expectedFutureCost = speculatedFutureCost - cost;
+		System.out.println("Speculated cost with new task: " + speculatedFutureCost + " | difference: " + expectedFutureCost);
 		if(speculatedFutureCost == (Double) null){
 			
 		}
@@ -408,7 +436,9 @@ public class AuctionAgent implements AuctionBehavior {
 		long time_end = System.currentTimeMillis();
         long duration = time_end - time_start;
         System.out.println("The bid was generated in " + duration + " milliseconds.");
-		return difference;
+		
+        double bid = (expectedCost * profitFactor + expectedFutureCost * speculationFactor + expectedBid * competitionFactor ) * getRankingFactor() * aggressivenessFactor;
+        return bid;
 	}
 }
 
