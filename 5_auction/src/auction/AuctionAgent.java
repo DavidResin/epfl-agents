@@ -19,7 +19,6 @@ import logist.task.TaskDistribution;
 import logist.task.TaskSet;
 import logist.topology.Topology;
 import logist.topology.Topology.City;
-import auction.Planning;
 
 /**
  * A very simple auction agent that assigns all tasks to its first vehicle and
@@ -95,11 +94,15 @@ public class AuctionAgent implements AuctionBehavior {
 
 	@Override
 	public void auctionResult(Task previous, int winner, Long[] bids) {
+<<<<<<< HEAD
+		System.out.println(bids);
+=======
 		for(int i = 0; i < bids.length; i ++){
 			System.out.print(i + ": " + bids[i] + " ");
 		}
 		System.out.println();
 		// Check is we won a task
+>>>>>>> 952d7f0cfaff72ccf18a4b6d22b4f9f1635d1d70
 		if (winner == agent.id()) {
 			currentCity = previous.deliveryCity;
 			
@@ -219,7 +222,7 @@ public class AuctionAgent implements AuctionBehavior {
 		
 		return totalFutureCost;
 	}
-		
+	
 	// Returns the list of the current gains of each adversary (all rewards - all bids), ignoring the cost of fuel which is an uncertain value
 	private List<Double> getGains() {		
 		List<Double> gains = new ArrayList<Double>(Collections.nCopies(auction_bids.get(0).length, 0d));
@@ -237,19 +240,58 @@ public class AuctionAgent implements AuctionBehavior {
 		return gains;
 	}
 	
+	private List<Double> getAccumulatedDistances() {
+		List<Double> accDis = new ArrayList<Double>();
+		
+		if (auction_winners.size() == 0)
+			return null;
+		
+		for (int i = 0; i < auction_bids.get(0).length; i++) {
+			List<Task> tasks_of_i = new ArrayList<Task>();
+			double total = 0d;
+			
+			for (int j = 0; j < auction_winners.size(); j++)
+				if (auction_winners.get(j) == i)
+					tasks_of_i.add(auction_tasks.get(j));
+			
+			for (int j = 0; j < tasks_of_i.size(); j++)
+				for (int k = 0; k < tasks_of_i.size(); k++)
+					if (k != j)
+						total += tasks_of_i.get(j).deliveryCity.distanceTo(tasks_of_i.get(k).deliveryCity)
+							+ tasks_of_i.get(j).deliveryCity.distanceTo(tasks_of_i.get(k).pickupCity)
+							+ tasks_of_i.get(j).pickupCity.distanceTo(tasks_of_i.get(k).deliveryCity)
+							+ tasks_of_i.get(j).pickupCity.distanceTo(tasks_of_i.get(k).pickupCity);
+					
+			if (tasks_of_i.size() == 0)
+				accDis.add(0d);
+			else
+				accDis.add(total / tasks_of_i.size());
+		}
+		
+		return accDis;
+	}
+	
+	private List<Double> getEstimatedTotals() {
+		return null;
+	}
+	
+	private List<Integer> getRankings() {
+		return null;
+	}
+	
 	// This value determines our willingness to lose money on the bid
 	private double getRiskToLoseMoney() {
-		return 0.0;
+		return -1;
 	}
 	
 	// This value determines our willingness to lose the bid
 	private double getRiskToLoseBid() {
-		return 0.0;
+		return -1;
 	}
 	
 	// The expected bid of the other agents
 	private double getExpectedBid() {
-		return 0.0;
+		return -1;
 	}
 	
 	// The expected extra cost for us if we take the next task
