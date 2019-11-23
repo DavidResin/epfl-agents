@@ -234,6 +234,10 @@ public class AuctionAgent implements AuctionBehavior {
 	}
 	
 	private List<Double> getAccumulatedDistances() {
+		return getAccumulatedDistances(null);
+	}
+	
+	private List<Double> getAccumulatedDistances(Task extra_task) {
 		List<Double> accDis = new ArrayList<Double>();
 		
 		if (auction_winners.size() == 0)
@@ -246,6 +250,9 @@ public class AuctionAgent implements AuctionBehavior {
 			for (int j = 0; j < auction_winners.size(); j++)
 				if (auction_winners.get(j) == i)
 					tasks_of_i.add(auction_tasks.get(j));
+			
+			if (extra_task != null && !tasks_of_i.contains(extra_task))
+				tasks_of_i.add(extra_task);
 			
 			for (int j = 0; j < tasks_of_i.size(); j++)
 				for (int k = 0; k < tasks_of_i.size(); k++)
