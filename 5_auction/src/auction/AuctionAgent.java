@@ -318,6 +318,20 @@ public class AuctionAgent implements AuctionBehavior {
 		return ranks;
 	}
 	
+	// Returns a value from .75 (first) to 1.25 (last)
+	private double getRankingFactor() {
+		List<Integer> ranks = getRankings();		
+		
+		if (ranks.size() < 2)
+			return 1;
+		
+		return ranks.get(agent.id()) * 1.0 / (ranks.size() - 1) / 2 + .75d;
+	}
+	
+	private Boolean firstTime() {
+		return auction_winners.size() == 0;
+	}
+	
 	// This value determines our willingness to lose money on the bid
 	private double getRiskToLoseMoney() {
 		return -1;
