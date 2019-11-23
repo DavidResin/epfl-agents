@@ -169,39 +169,22 @@ public class AuctionAgent implements AuctionBehavior {
 	@Override
 	public List<Plan> plan(List<Vehicle> vehicles, TaskSet tasks) {
 		
-//		System.out.println("Agent " + agent.id() + " has tasks " + tasks);
-
-		Plan planVehicle1 = naivePlan(vehicle, tasks);
-
-		List<Plan> plans = new ArrayList<Plan>();
-		plans.add(planVehicle1);
-		while (plans.size() < vehicles.size())
-			plans.add(Plan.EMPTY);
+		List<Task> taskList = new ArrayList<Task>();
+		for(Task task : taskList){
+			taskList.add(task);
+		}
+			
+		List<Plan> plans = Planning.CSPMultiplePlan(vehicles, taskList, 4, 1000);
+		
+		double cost = 0.0;
+		for(int i = 0; i < agent.vehicles().size(); i++){
+			cost += plans.get(i).totalDistance() * agent.vehicles().get(i).costPerKm();
+		}
+		
+		double profit = tasks.rewardSum() - cost;
+		System.out.println("Agent " + agent.id() + " | Total profit : " + profit);
 
 		return plans;
-	}
-
-	private Plan naivePlan(Vehicle vehicle, TaskSet tasks) {
-		City current = vehicle.getCurrentCity();
-		Plan plan = new Plan(current);
-
-		for (Task task : tasks) {
-			// move: current city => pickup location
-			for (City city : current.pathTo(task.pickupCity))
-				plan.appendMove(city);
-
-			plan.appendPickup(task);
-
-			// move: pickup location => delivery location
-			for (City city : task.path())
-				plan.appendMove(city);
-
-			plan.appendDelivery(task);
-
-			// set current city
-			current = task.deliveryCity;
-		}
-		return plan;
 	}
 	
 	private double speculateFutureCost(Task auctionedTask){
