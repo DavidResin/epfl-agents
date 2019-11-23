@@ -44,6 +44,7 @@ public class AuctionAgent implements AuctionBehavior {
 	private List<Task> auction_tasks;
 	private List<Integer> auction_winners;
 	private List<Long[]> auction_bids;
+	private List<Double[]> bid_factors;
 	
 	// List of tasks we won
 	private List<Task> won_tasks;
@@ -68,6 +69,7 @@ public class AuctionAgent implements AuctionBehavior {
 		auction_tasks = new ArrayList<Task>();
 		auction_winners = new ArrayList<Integer>();
 		auction_bids = new ArrayList<Long[]>();
+		bid_factors = new ArrayList<Double[]>();
 		
 		won_tasks = new ArrayList<Task>();
 		current_cost = 0.0;
@@ -120,6 +122,24 @@ public class AuctionAgent implements AuctionBehavior {
 		auction_tasks.add(previous);
 		auction_winners.add(winner);
 		auction_bids.add(bids);
+		
+		// Predict the bid factor for all the agents
+		List<Double> distances = getAccumulatedDistances(previous);
+		Double[] latest_bid_factors = new Double[bids.length];
+		System.out.print("Bid factors:");
+		for(int i = 0; i < bids.length; i++){
+			if(distances.get(i) == 0){
+				// The agent had not won any tasks yet
+				double distance = previous.pickupCity.distanceTo(previous.deliveryCity);
+				latest_bid_factors[i] = bids[i] / distance;
+			}else{
+				latest_bid_factors[i] = bids[i] / distances.get(i);
+			}
+			System.out.print(latest_bid_factors[i] + " ");
+		}
+		System.out.println();
+		bid_factors.add(latest_bid_factors);
+		
 	}
 	
 	@Override
@@ -303,8 +323,29 @@ public class AuctionAgent implements AuctionBehavior {
 	}
 	
 	// The expected bid of the other agents
-	private double getExpectedBid() {
-		return -1;
+	private List<Double> getExpectedBid(Task auctionedTask) {
+		ArrayList<Double> predictedBids = new ArrayList<Double>();
+		List<Double> estimated_distances = getAccumulatedDistances(auctionedTask);
+		if(bid_factors.size() == 0){
+			return null;
+		}
+		for(int i = 0; i < bid_factors.get(0).length; i++){
+			// Compute the average bid factor for this agent
+			double bid_factor = 0;
+			for(int j = 0; j < bid_factors.size(); j++){
+				bid_factor += bid_factors.get(j)[i];
+			}
+			bid_factor /= bid_factors.size();
+			// Compute the predicted bid of the agent
+			if(estimated_distances.get(i) == 0){
+				// If there is no distance estimation, take the distance of the auctioned task
+				predictedBids.add(auctionedTask.pickupCity.distanceTo(auctionedTask.deliveryCity) * bid_factor);
+			}else{
+				predictedBids.add(estimated_distances.get(i) * bid_factor);
+			}
+		}
+		
+		return predictedBids;
 	}
 	
 	// The expected extra cost for us if we take the next task
@@ -330,6 +371,11 @@ public class AuctionAgent implements AuctionBehavior {
 		long time_start = System.currentTimeMillis();
 		System.out.println("=====");
 		System.out.println("Agent " + agent.id() + " | Auctioned task : " + auctionedTask);
+		
+		// Compute the predicted bids of the other agents
+		List<Double> predicted_bids = getExpectedBid(auctionedTask);
+		System.out.println("Expected bids: " + predicted_bids);
+		
 		System.out.println("Current cost: " + current_cost);
 		
 		// Compute the difference with the cost of delivering all tasks we have already won
