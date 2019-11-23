@@ -43,7 +43,6 @@ public class Planning {
     		Collections.sort(newAs);
     		As = newAs.subList(0, (int) (Math.pow(2, stages - s - 1)));
     	}
-    	
     	return As.get(0).getPlans();
     }
     
@@ -54,13 +53,13 @@ public class Planning {
     	if (newA == null)
     		newA = A;
     	
-    	if(i % 100 == 0){
+    	/*if(i % 100 == 0){
     		System.out.print("Iteration " + i + " : " + N.size() + " neighbors / ");
     		for (List<Integer> o : newA.getOrders())
     			System.out.print(o.size() + " ");
     		System.out.print(" / " + newA.getCost() + " / " + (newA.getCost() - A.getCost()));
     		System.out.println();
-    	}
+    	}*/
 		
 		return newA;
     }

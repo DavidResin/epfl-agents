@@ -169,12 +169,15 @@ public class AuctionAgent implements AuctionBehavior {
 	@Override
 	public List<Plan> plan(List<Vehicle> vehicles, TaskSet tasks) {
 		
+		System.out.println("Agent " + agent.id() + " has tasks " + tasks);
+		
 		List<Task> taskList = new ArrayList<Task>();
-		for(Task task : taskList){
+		for(Task task : tasks){
 			taskList.add(task);
 		}
-			
+		System.out.println("Planning");
 		List<Plan> plans = Planning.CSPMultiplePlan(vehicles, taskList, 4, 1000);
+		System.out.println("Planned");
 		
 		double cost = 0.0;
 		for(int i = 0; i < agent.vehicles().size(); i++){
@@ -185,6 +188,7 @@ public class AuctionAgent implements AuctionBehavior {
 		System.out.println("Agent " + agent.id() + " | Total profit : " + profit);
 
 		return plans;
+		
 	}
 	
 	private double speculateFutureCost(Task auctionedTask){
