@@ -22,12 +22,7 @@ public class Planning {
 
     private static double proba_random;
 	
-	public static List<Plan> CSPMultiplePlan(List<Vehicle> vehicles, List<Task> tasks, int stages, int iterations) {
-    	System.out.println(vehicles);
-    	
-    	for (Task task : tasks)
-    		System.out.println(task);
-    	
+	public static List<Plan> CSPMultiplePlan(List<Vehicle> vehicles, List<Task> tasks, int stages, int iterations) {    	
     	List<Assignment> As = new ArrayList<Assignment>();
     	
     	for (int i = 0; i < Math.pow(2, stages); i++)
@@ -49,7 +44,6 @@ public class Planning {
     		As = newAs.subList(0, (int) (Math.pow(2, stages - s - 1)));
     	}
     	
-    	System.out.println("Plan chosen: cost = " + As.get(0).getCost());
     	return As.get(0).getPlans();
     }
     
@@ -60,11 +54,13 @@ public class Planning {
     	if (newA == null)
     		newA = A;
     	
-    	/*System.out.print("Iteration " + i + " : " + N.size() + " neighbors / ");
-		for (List<Integer> o : newA.getOrders())
-			System.out.print(o.size() + " ");
-		System.out.print(" / " + newA.getCost() + " / " + (newA.getCost() - A.getCost()));
-		System.out.println();*/
+    	/*if(i % 100 == 0){
+    		System.out.print("Iteration " + i + " : " + N.size() + " neighbors / ");
+    		for (List<Integer> o : newA.getOrders())
+    			System.out.print(o.size() + " ");
+    		System.out.print(" / " + newA.getCost() + " / " + (newA.getCost() - A.getCost()));
+    		System.out.println();
+    	}*/
 		
 		return newA;
     }
