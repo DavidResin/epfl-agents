@@ -299,7 +299,6 @@ public class AuctionAgent implements AuctionBehavior {
 		//double speculatedFutureCost = speculateFutureCost(auctionedTask);
 		//System.out.println("Speculated cost with new task: " + speculatedFutureCost + " | difference: " + (speculatedFutureCost - cost));
 		return difference;
->>>>>>> 952d7f0cfaff72ccf18a4b6d22b4f9f1635d1d70
 	}
 }
 
