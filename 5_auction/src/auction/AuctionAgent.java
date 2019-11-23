@@ -295,11 +295,16 @@ public class AuctionAgent implements AuctionBehavior {
 		List<Double> accDis = getAccumulatedDistances();
 		List<Double> gains = getGains();
 		List<Double> totals = new ArrayList<Double>();
+		double otherCost;
 		
-		double myGain = gains.get(agent.id());
-		
-		for (int i = 0; i < gains.size(); i++)
-			totals.add(gains.get(i) + current_cost * accDis.get(i) / accDis.get(agent.id()));
+		for (int i = 0; i < gains.size(); i++) {
+			if (accDis.get(agent.id()) == 0)
+				otherCost = 0;
+			else
+				otherCost = current_cost * accDis.get(i) / accDis.get(agent.id());
+			
+			totals.add(gains.get(i) + otherCost);
+		}
 		
 		return totals;
 	}
@@ -399,9 +404,9 @@ public class AuctionAgent implements AuctionBehavior {
 		// Compute the current rankings
 		List<Integer> rankings = getRankings();
 		System.out.println("Current estimated ranking: " + rankings);
-		if(auction_winners.size() != 0){
+		
+		if (!firstTime())
 			System.out.println("Estimated totals: " + getEstimatedTotals());
-		}
 		
 		// Compute the predicted bids of the other agents
 		List<Double> predicted_bids = getExpectedBid(auctionedTask);
@@ -409,14 +414,13 @@ public class AuctionAgent implements AuctionBehavior {
 		
 		// Get the lowest out of all these bids
 		double expectedBid = 0.0;
-		if(predicted_bids != null){
+		if (predicted_bids != null) {
 			expectedBid = predicted_bids.get(0);
-			for(Double bid : predicted_bids){
-				if(bid < expectedBid)
+			
+			for (Double bid : predicted_bids)
+				if (bid < expectedBid)
 					expectedBid = bid;
-			}
 		}
-		
 		
 		// Compute the difference with the cost of delivering all tasks we have already won
 		System.out.println("Current cost: " + current_cost);
