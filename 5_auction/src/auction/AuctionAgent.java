@@ -1,13 +1,16 @@
 package auction;
 
+import java.io.File;
 //the list of imports
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import logist.LogistSettings;
 import logist.Measures;
 import logist.behavior.AuctionBehavior;
+import logist.config.Parsers;
 import logist.agent.Agent;
 import logist.simulation.Vehicle;
 import logist.plan.Plan;
@@ -32,6 +35,10 @@ public class AuctionAgent implements AuctionBehavior {
 	private Random random;
 	private Vehicle vehicle;
 	private City currentCity;
+	
+	private long timeout_setup;
+    private long timeout_plan;
+    private long timeout_bid;
 	
 	// Storage of auction data
 	private List<Task> auction_tasks;
@@ -66,6 +73,24 @@ public class AuctionAgent implements AuctionBehavior {
 		current_cost = 0.0;
 		
 		plans = new ArrayList<Plan>();
+		
+		// this code is used to get the timeouts
+        LogistSettings ls = null;
+        try {
+            ls = Parsers.parseSettings("config" + File.separator + "settings_auction.xml");
+        }
+        catch (Exception exc) {
+            System.out.println("There was a problem loading the configuration file.");
+        }
+        
+		// the setup method cannot last more than timeout_setup milliseconds
+        timeout_setup = ls.get(LogistSettings.TimeoutKey.SETUP);
+        // the plan method cannot execute more than timeout_plan milliseconds
+        timeout_plan = ls.get(LogistSettings.TimeoutKey.PLAN);
+        // the plan method cannot execute more than timeout_plan milliseconds
+        timeout_bid = ls.get(LogistSettings.TimeoutKey.BID);
+        
+        System.out.println(timeout_plan);
 	}
 
 	@Override
@@ -74,7 +99,6 @@ public class AuctionAgent implements AuctionBehavior {
 			System.out.print(i + ": " + bids[i] + " ");
 		}
 		System.out.println();
-		System.out.println("========");
 		// Check is we won a task
 		if (winner == agent.id()) {
 			currentCity = previous.deliveryCity;
@@ -158,12 +182,13 @@ public class AuctionAgent implements AuctionBehavior {
 	}
 	
 	private double speculateFutureCost(Task auctionedTask){
+		long time_start = System.currentTimeMillis();
 		double totalFutureCost = 0.0;
 		
 		// Iterate over all the possible next tasks
 		for(City cityFrom : topology.cities()){
 			for(City cityTo : topology.cities()){
-				if(cityTo == cityFrom)
+				if(cityTo == cityFrom || distribution.probability(cityFrom, cityTo) < 0.1)
 					continue;
 				double cost = 0.0;
 				// Create the list of tasks in this speculated plan
@@ -174,16 +199,21 @@ public class AuctionAgent implements AuctionBehavior {
 				tasks.add(speculatedTask);
 				
 				// Compute a good plan for this task set
-				List<Plan> plans = Planning.CSPMultiplePlan(agent.vehicles(), tasks, 4, 1000);
+				List<Plan> plans = Planning.CSPMultiplePlan(agent.vehicles(), tasks, 2, 500);
 				
 				// Compute the cost of this plan
 				for(int i = 0; i < agent.vehicles().size(); i++){
 					cost += plans.get(i).totalDistance() * agent.vehicles().get(i).costPerKm();
 				}
 				// System.out.println(auctionedTask + " / " + speculatedTask + " cost: " + cost);
-				
 				// Add this cost to the total cost, weighted by the probability that this task will be the next one
 				totalFutureCost += cost * distribution.probability(cityFrom, cityTo) / topology.cities().size();
+				
+				// Check if we are not going overtime
+				long time_now = System.currentTimeMillis();
+				if(time_now - time_start > timeout_bid * 0.8){
+					return (Double) null;
+				}
 			}
 		}
 		
@@ -242,7 +272,9 @@ public class AuctionAgent implements AuctionBehavior {
 	}
 	
 	private double getBid(Task auctionedTask) {
-		System.out.println("Agent " + agent.id() + "| Auctioned task : " + auctionedTask);
+		long time_start = System.currentTimeMillis();
+		System.out.println("=====");
+		System.out.println("Agent " + agent.id() + " | Auctioned task : " + auctionedTask);
 		System.out.println("Current cost: " + current_cost);
 		
 		// Compute the difference with the cost of delivering all tasks we have already won
@@ -251,8 +283,16 @@ public class AuctionAgent implements AuctionBehavior {
 		System.out.println("Expected cost with auctioned task: " + cost + " | difference: " + difference);
 		
 		// Compute the speculated value for the possible next plan
-		//double speculatedFutureCost = speculateFutureCost(auctionedTask);
-		//System.out.println("Speculated cost with new task: " + speculatedFutureCost + " | difference: " + (speculatedFutureCost - cost));
+		double speculatedFutureCost = speculateFutureCost(auctionedTask);
+		System.out.println("Speculated cost with new task: " + speculatedFutureCost + " | difference: " + (speculatedFutureCost - cost));
+		if(speculatedFutureCost == (Double) null){
+			
+		}
+		
+		// Compute the time it took to generate the bid
+		long time_end = System.currentTimeMillis();
+        long duration = time_end - time_start;
+        System.out.println("The bid was generated in " + duration + " milliseconds.");
 		return difference;
 	}
 }
