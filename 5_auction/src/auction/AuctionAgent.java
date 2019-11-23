@@ -37,6 +37,11 @@ public class AuctionAgent implements AuctionBehavior {
 	private List<Integer> auction_winners;
 	private List<Long[]> auction_bids;
 	
+	// List of tasks we won
+	private List<Task> won_tasks;
+	// Cost of the optimal plan for delivering all tasks we have currently won
+	private double current_cost;
+	
 	private List<Plan> plans;
 
 	@Override
@@ -56,14 +61,39 @@ public class AuctionAgent implements AuctionBehavior {
 		auction_winners = new ArrayList<Integer>();
 		auction_bids = new ArrayList<Long[]>();
 		
+		won_tasks = new ArrayList<Task>();
+		current_cost = 0.0;
+		
 		plans = new ArrayList<Plan>();
 	}
 
 	@Override
 	public void auctionResult(Task previous, int winner, Long[] bids) {
+<<<<<<< HEAD
 		System.out.println(bids);
+=======
+		for(int i = 0; i < bids.length; i ++){
+			System.out.print(i + ": " + bids[i] + " ");
+		}
+		System.out.println();
+		System.out.println("========");
+		// Check is we won a task
+>>>>>>> 952d7f0cfaff72ccf18a4b6d22b4f9f1635d1d70
 		if (winner == agent.id()) {
 			currentCity = previous.deliveryCity;
+			
+			// Add the task we won to the list of won tasks and compute the new plan cost
+			won_tasks.add(previous);
+			
+			// Compute a good plan for this list of tasks
+			List<Plan> plans = Planning.CSPMultiplePlan(agent.vehicles(), won_tasks, 4, 1000);
+			
+			// Compute the cost of this plan
+			current_cost = 0.0;
+			for(int i = 0; i < agent.vehicles().size(); i++){
+				current_cost += plans.get(i).totalDistance() * agent.vehicles().get(i).costPerKm();
+			}
+			
 		}
 		
 		auction_tasks.add(previous);
@@ -74,7 +104,7 @@ public class AuctionAgent implements AuctionBehavior {
 	@Override
 	public Long askPrice(Task task) {
 
-		if (vehicle.capacity() < task.weight)
+		/*if (vehicle.capacity() < task.weight)
 			return null;
 
 		long distanceTask = task.pickupCity.distanceUnitsTo(task.deliveryCity);
@@ -84,7 +114,10 @@ public class AuctionAgent implements AuctionBehavior {
 				* vehicle.costPerKm());
 
 		double ratio = 1.0 + (random.nextDouble() * 0.05 * task.id);
-		double bid = ratio * marginalCost;
+		double bid = ratio * marginalCost;*/
+		
+		double bid = getBid(task);
+		
 		System.out.println("Task: " + task + ", bid: " + bid);
 		return (long) Math.round(bid);
 	}
@@ -127,6 +160,42 @@ public class AuctionAgent implements AuctionBehavior {
 		return plan;
 	}
 	
+<<<<<<< HEAD
+=======
+	private double speculateFutureCost(Task auctionedTask){
+		double totalFutureCost = 0.0;
+		
+		// Iterate over all the possible next tasks
+		for(City cityFrom : topology.cities()){
+			for(City cityTo : topology.cities()){
+				if(cityTo == cityFrom)
+					continue;
+				double cost = 0.0;
+				// Create the list of tasks in this speculated plan
+				List<Task> tasks = new ArrayList<Task>();
+				tasks.addAll(won_tasks);
+				tasks.add(auctionedTask);
+				Task speculatedTask = new Task(won_tasks.size() + 1, cityFrom, cityTo, 0, distribution.weight(cityFrom, cityTo)); 
+				tasks.add(speculatedTask);
+				
+				// Compute a good plan for this task set
+				List<Plan> plans = Planning.CSPMultiplePlan(agent.vehicles(), tasks, 4, 1000);
+				
+				// Compute the cost of this plan
+				for(int i = 0; i < agent.vehicles().size(); i++){
+					cost += plans.get(i).totalDistance() * agent.vehicles().get(i).costPerKm();
+				}
+				// System.out.println(auctionedTask + " / " + speculatedTask + " cost: " + cost);
+				
+				// Add this cost to the total cost, weighted by the probability that this task will be the next one
+				totalFutureCost += cost * distribution.probability(cityFrom, cityTo) / topology.cities().size();
+			}
+		}
+		
+		return totalFutureCost;
+	}
+		
+>>>>>>> 952d7f0cfaff72ccf18a4b6d22b4f9f1635d1d70
 	// Returns the list of the current gains of each adversary (all rewards - all bids), ignoring the cost of fuel which is an uncertain value
 	private List<Double> getGains() {		
 		List<Double> gains = new ArrayList<Double>(Collections.nCopies(auction_bids.get(0).length, 0d));
@@ -198,13 +267,39 @@ public class AuctionAgent implements AuctionBehavior {
 		return -1;
 	}
 	
-	// The expected cost for us if we take the next task
-	private double getExpectedCost() {
-		return -1;		
+	// The expected extra cost for us if we take the next task
+	private double getExpectedCost(Task auctionedTask) {
+		double cost = 0.0;
+		// Create a list of all the tasks we would have to deliver if we were to take this task
+		List<Task> tasks = new ArrayList<Task>();
+		tasks.addAll(won_tasks);
+		tasks.add(auctionedTask);
+		
+		// Compute a good plan for this list of tasks
+		List<Plan> plans = Planning.CSPMultiplePlan(agent.vehicles(), tasks, 4, 1000);
+		
+		// Compute the cost of this plan
+		for(int i = 0; i < agent.vehicles().size(); i++){
+			cost += plans.get(i).totalDistance() * agent.vehicles().get(i).costPerKm();
+		}
+		
+		return cost;
 	}
 	
-	private double getBid() {
-		return -1;
+	private double getBid(Task auctionedTask) {
+		System.out.println("Agent " + agent.id() + "| Auctioned task : " + auctionedTask);
+		System.out.println("Current cost: " + current_cost);
+		
+		// Compute the difference with the cost of delivering all tasks we have already won
+		double cost = getExpectedCost(auctionedTask);
+		double difference = cost - current_cost;
+		System.out.println("Expected cost with auctioned task: " + cost + " | difference: " + difference);
+		
+		// Compute the speculated value for the possible next plan
+		//double speculatedFutureCost = speculateFutureCost(auctionedTask);
+		//System.out.println("Speculated cost with new task: " + speculatedFutureCost + " | difference: " + (speculatedFutureCost - cost));
+		return difference;
+>>>>>>> 952d7f0cfaff72ccf18a4b6d22b4f9f1635d1d70
 	}
 }
 
