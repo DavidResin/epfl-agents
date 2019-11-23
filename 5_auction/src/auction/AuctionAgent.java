@@ -312,6 +312,10 @@ public class AuctionAgent implements AuctionBehavior {
 		return ranks;
 	}
 	
+	private Boolean firstTime() {
+		return auction_winners.size() == 0;
+	}
+	
 	// This value determines our willingness to lose money on the bid
 	private double getRiskToLoseMoney() {
 		return -1;
