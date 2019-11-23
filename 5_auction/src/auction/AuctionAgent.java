@@ -3,6 +3,7 @@ package auction;
 //the list of imports
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
@@ -69,16 +70,13 @@ public class AuctionAgent implements AuctionBehavior {
 
 	@Override
 	public void auctionResult(Task previous, int winner, Long[] bids) {
-<<<<<<< HEAD
-		System.out.println(bids);
-=======
+
 		for(int i = 0; i < bids.length; i ++){
 			System.out.print(i + ": " + bids[i] + " ");
 		}
 		System.out.println();
 		System.out.println("========");
 		// Check is we won a task
->>>>>>> 952d7f0cfaff72ccf18a4b6d22b4f9f1635d1d70
 		if (winner == agent.id()) {
 			currentCity = previous.deliveryCity;
 			
@@ -199,11 +197,7 @@ public class AuctionAgent implements AuctionBehavior {
 		
 		for (int i = 0; i < auction_tasks.size(); i++) {
 			int winner = auction_winners.get(i);
-			
-			double total = gains.get(winner);
-			total += auction_tasks.get(i).reward;
-			total -= auction_bids.get(i)[winner];
-			
+			double total = gains.get(winner) + auction_bids.get(i)[winner];
 			gains.set(winner, total);
 		}
 		
@@ -242,11 +236,27 @@ public class AuctionAgent implements AuctionBehavior {
 	}
 	
 	private List<Double> getEstimatedTotals() {
-		return null;
+		List<Double> accDis = getAccumulatedDistances();
+		List<Double> gains = getGains();
+		List<Double> totals = new ArrayList<Double>();
+		
+		double myGain = gains.get(agent.id());
+		
+		for (int i = 0; i < gains.size(); i++)
+			totals.add(gains.get(i) + current_cost * accDis.get(i) / accDis.get(agent.id()));
+		
+		return totals;
 	}
 	
 	private List<Integer> getRankings() {
-		return null;
+		List<Integer> ranks = new ArrayList<Integer>();
+		List<Double> totals = getEstimatedTotals();
+		Collections.sort(totals);
+		
+		for (int i = 0; i < totals.size(); i++)
+			ranks.add(totals.indexOf(getEstimatedTotals().get(i)));
+		
+		return ranks;
 	}
 	
 	// This value determines our willingness to lose money on the bid
