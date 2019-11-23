@@ -2,6 +2,7 @@ package auction;
 
 //the list of imports
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -31,6 +32,13 @@ public class AuctionAgent implements AuctionBehavior {
 	private Random random;
 	private Vehicle vehicle;
 	private City currentCity;
+	
+	// Storage of auction data
+	private List<Task> auction_tasks;
+	private List<Integer> auction_winners;
+	private List<Long[]> auction_bids;
+	
+	private List<Plan> plans;
 
 	@Override
 	public void setup(Topology topology, TaskDistribution distribution,
@@ -44,7 +52,12 @@ public class AuctionAgent implements AuctionBehavior {
 
 		long seed = -9019554669489983951L * currentCity.hashCode() * agent.id();
 		this.random = new Random(seed);
-		speculateFutureCost(null);
+		
+		auction_tasks = new ArrayList<Task>();
+		auction_winners = new ArrayList<Integer>();
+		auction_bids = new ArrayList<Long[]>();
+		
+		plans = new ArrayList<Plan>();
 	}
 
 	@Override
@@ -56,6 +69,10 @@ public class AuctionAgent implements AuctionBehavior {
 		if (winner == agent.id()) {
 			currentCity = previous.deliveryCity;
 		}
+		
+		auction_tasks.add(previous);
+		auction_winners.add(winner);
+		auction_bids.add(bids);
 	}
 	
 	@Override
@@ -146,4 +163,46 @@ public class AuctionAgent implements AuctionBehavior {
 		
 		return totalFutureCost;
 	}
+		
+	// Returns the list of the current gains of each adversary (all rewards - all bids), ignoring the cost of fuel which is an uncertain value
+	private List<Double> getGains() {		
+		List<Double> gains = new ArrayList<Double>(Collections.nCopies(auction_bids.get(0).length, 0d));
+		
+		for (int i = 0; i < auction_tasks.size(); i++) {
+			int winner = auction_winners.get(i);
+			
+			double total = gains.get(winner);
+			total += auction_tasks.get(i).reward;
+			total -= auction_bids.get(i)[winner];
+			
+			gains.set(winner, total);
+		}
+		
+		return gains;
+	}
+	
+	// This value determines our willingness to lose money on the bid
+	private double getRiskToLoseMoney() {
+		return 0.0;
+	}
+	
+	// This value determines our willingness to lose the bid
+	private double getRiskToLoseBid() {
+		return 0.0;
+	}
+	
+	// The expected bid of the other agents
+	private double getExpectedBid() {
+		return 0.0;
+	}
+	
+	// The expected cost for us if we take the next task
+	private double getExpectedCost() {
+		return 0.0;
+	}
+	
+	private double getBid() {
+		return getExpectedCost();
+	}
 }
+
