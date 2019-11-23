@@ -144,6 +144,37 @@ public class AuctionAgent implements AuctionBehavior {
 		return gains;
 	}
 	
+	private List<Double> getAccumulatedDistances() {
+		List<Double> accDis = new ArrayList<Double>();
+		
+		if (auction_winners.size() == 0)
+			return null;
+		
+		for (int i = 0; i < auction_bids.get(0).length; i++) {
+			List<Task> tasks_of_i = new ArrayList<Task>();
+			double total = 0d;
+			
+			for (int j = 0; j < auction_winners.size(); j++)
+				if (auction_winners.get(j) == i)
+					tasks_of_i.add(auction_tasks.get(j));
+			
+			for (int j = 0; j < tasks_of_i.size(); j++)
+				for (int k = 0; k < tasks_of_i.size(); k++)
+					if (k != j)
+						total += tasks_of_i.get(j).deliveryCity.distanceTo(tasks_of_i.get(k).deliveryCity)
+							+ tasks_of_i.get(j).deliveryCity.distanceTo(tasks_of_i.get(k).pickupCity)
+							+ tasks_of_i.get(j).pickupCity.distanceTo(tasks_of_i.get(k).deliveryCity)
+							+ tasks_of_i.get(j).pickupCity.distanceTo(tasks_of_i.get(k).pickupCity);
+					
+			if (tasks_of_i.size() == 0)
+				accDis.add(0d);
+			else
+				accDis.add(total / tasks_of_i.size());
+		}
+		
+		return accDis;
+	}
+	
 	// This value determines our willingness to lose money on the bid
 	private double getRiskToLoseMoney() {
 		
