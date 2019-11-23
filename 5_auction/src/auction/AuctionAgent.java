@@ -432,9 +432,6 @@ public class AuctionAgent implements AuctionBehavior {
 		double speculatedFutureCost = speculateFutureCost(auctionedTask);
 		double expectedFutureCost = speculatedFutureCost - cost;
 		System.out.println("Speculated cost with new task: " + speculatedFutureCost + " | difference: " + expectedFutureCost);
-		if(speculatedFutureCost == (Double) null){
-			
-		}
 		
 		// Compute the time it took to generate the bid
 		long time_end = System.currentTimeMillis();
