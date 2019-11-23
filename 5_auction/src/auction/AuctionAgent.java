@@ -94,15 +94,11 @@ public class AuctionAgent implements AuctionBehavior {
 
 	@Override
 	public void auctionResult(Task previous, int winner, Long[] bids) {
-<<<<<<< HEAD
-		System.out.println(bids);
-=======
 		for(int i = 0; i < bids.length; i ++){
 			System.out.print(i + ": " + bids[i] + " ");
 		}
 		System.out.println();
-		// Check is we won a task
->>>>>>> 952d7f0cfaff72ccf18a4b6d22b4f9f1635d1d70
+		// Check if we won a task
 		if (winner == agent.id()) {
 			currentCity = previous.deliveryCity;
 			
