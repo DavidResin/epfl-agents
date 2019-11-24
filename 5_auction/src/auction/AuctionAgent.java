@@ -52,10 +52,10 @@ public class AuctionAgent implements AuctionBehavior {
 	private double current_cost;
 	
 	// All model parameters
-	private Double profitFactor = 1.5;
-	private Double speculationFactor = 0.0;
+	private Double profitFactor = 1.3;
+	private Double speculationFactor = -0.1;
 	private Double competitionFactor = 0.2;
-	private Double aggressivenessFactor = 1.0;
+	private Double aggressivenessFactor = 0.0;
 	
 	private List<Plan> plans;
 
@@ -433,8 +433,7 @@ public class AuctionAgent implements AuctionBehavior {
         long duration = time_end - time_start;
         System.out.println("The bid was generated in " + duration + " milliseconds.");
 		
-        // double bid = (expectedCost * profitFactor * (1 - speculationFactor - competitionFactor) + expectedFutureCost * speculationFactor + expectedBid * competitionFactor) * (getRankingFactor() * aggressivenessFactor);
-        double bid = expectedCost * profitFactor * (1 - speculationFactor - competitionFactor) + expectedFutureCost * speculationFactor + expectedBid * competitionFactor;
+        double bid = (expectedCost * profitFactor * (1 - speculationFactor - competitionFactor) + expectedFutureCost * speculationFactor + expectedBid * competitionFactor) * (Math.pow(getRankingFactor(), aggressivenessFactor));
         return bid;
 	}
 }
