@@ -54,7 +54,7 @@ public class AuctionAgent implements AuctionBehavior {
 	// All model parameters
 	private Double profitFactor = 1.5;
 	private Double speculationFactor = 0.0;
-	private Double competitionFactor = 0.1;
+	private Double competitionFactor = 0.2;
 	private Double aggressivenessFactor = 1.0;
 	
 	private List<Plan> plans;
