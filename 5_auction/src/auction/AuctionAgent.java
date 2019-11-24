@@ -52,8 +52,8 @@ public class AuctionAgent implements AuctionBehavior {
 	private double current_cost;
 	
 	// All model parameters
-	private Double profitFactor = 1.4;
-	private Double speculationFactor = 0.0;
+	private Double profitFactor = 1.5;
+	private Double speculationFactor = 0.3;
 	private Double competitionFactor = 0.0;
 	private Double aggressivenessFactor = 1.0;
 	
@@ -407,17 +407,26 @@ public class AuctionAgent implements AuctionBehavior {
 		
 		// Compute the predicted bids of the other agents
 		List<Double> predicted_bids = getExpectedBid(auctionedTask);
-		System.out.println("Expected bids: " + predicted_bids);
 		
-		// Get the lowest out of all these bids
+		// Get the lowest out of all these bids (except for our own)
 		double expectedBid = 0.0;
 		if (predicted_bids != null) {
-			expectedBid = predicted_bids.get(0);
+			if(agent.id() == 0){
+				expectedBid = predicted_bids.get(1);
+			}else{
+				expectedBid = predicted_bids.get(0);
+			}
 			
-			for (Double bid : predicted_bids)
+			for(int i = 1; i< predicted_bids.size(); i++){
+				if(i == agent.id())
+					continue;
+				Double bid = predicted_bids.get(i);
 				if (bid < expectedBid)
 					expectedBid = bid;
+			}				
 		}
+		
+		System.out.println("Expected bids: " + predicted_bids + ", lowest: " + expectedBid);
 		
 		// Compute the difference with the cost of delivering all tasks we have already won
 		System.out.println("Current cost: " + current_cost);
@@ -435,8 +444,8 @@ public class AuctionAgent implements AuctionBehavior {
         long duration = time_end - time_start;
         System.out.println("The bid was generated in " + duration + " milliseconds.");
 		
-        // double bid = (expectedCost * profitFactor + expectedFutureCost * speculationFactor + expectedBid * competitionFactor ) * (getRankingFactor() * aggressivenessFactor);
-        double bid = expectedCost * profitFactor + expectedFutureCost * speculationFactor + expectedBid * competitionFactor;
+        // double bid = (expectedCost * profitFactor * (1 - speculationFactor - competitionFactor) + expectedFutureCost * speculationFactor * (1 - competitionFactor) + expectedBid * competitionFactor * (1 - speculationFactor)) * (getRankingFactor() * aggressivenessFactor);
+        double bid = expectedCost * profitFactor * (1 - speculationFactor - competitionFactor) + expectedFutureCost * speculationFactor * (1 - competitionFactor) + expectedBid * competitionFactor * (1 - speculationFactor);
         return bid;
 	}
 }
