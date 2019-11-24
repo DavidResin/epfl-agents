@@ -330,16 +330,6 @@ public class AuctionAgent implements AuctionBehavior {
 		return auction_winners.size() == 0;
 	}
 	
-	// This value determines our willingness to lose money on the bid
-	private double getRiskToLoseMoney() {
-		return -1;
-	}
-	
-	// This value determines our willingness to lose the bid
-	private double getRiskToLoseBid() {
-		return -1;
-	}
-	
 	// The expected bid of the other agents
 	private List<Double> getExpectedBid(Task auctionedTask) {
 		ArrayList<Double> predictedBids = new ArrayList<Double>();
@@ -380,7 +370,7 @@ public class AuctionAgent implements AuctionBehavior {
 		List<Plan> plans = Planning.CSPMultiplePlan(agent.vehicles(), tasks, 4, 1000);
 		
 		// Compute the cost of this plan
-		for(int i = 0; i < agent.vehicles().size(); i++)
+		for (int i = 0; i < agent.vehicles().size(); i++)
 			cost += plans.get(i).totalDistance() * agent.vehicles().get(i).costPerKm();
 		
 		return cost;
@@ -410,7 +400,7 @@ public class AuctionAgent implements AuctionBehavior {
 			else
 				expectedBid = predicted_bids.get(0);
 			
-			for (int i = 1; i< predicted_bids.size(); i++) {
+			for (int i = 1; i < predicted_bids.size(); i++) {
 				if (i == agent.id())
 					continue;
 				
