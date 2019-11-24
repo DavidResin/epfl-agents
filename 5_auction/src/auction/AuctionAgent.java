@@ -60,8 +60,7 @@ public class AuctionAgent implements AuctionBehavior {
 	private List<Plan> plans;
 
 	@Override
-	public void setup(Topology topology, TaskDistribution distribution,
-			Agent agent) {
+	public void setup(Topology topology, TaskDistribution distribution, Agent agent) {
 
 		this.topology = topology;
 		this.distribution = distribution;
@@ -84,6 +83,7 @@ public class AuctionAgent implements AuctionBehavior {
 		
 		// this code is used to get the timeouts
         LogistSettings ls = null;
+        
         try {
             ls = Parsers.parseSettings("config" + File.separator + "settings_auction.xml");
         }
@@ -103,9 +103,9 @@ public class AuctionAgent implements AuctionBehavior {
 
 	@Override
 	public void auctionResult(Task previous, int winner, Long[] bids) {
-		for(int i = 0; i < bids.length; i ++){
+		for (int i = 0; i < bids.length; i ++)
 			System.out.print(i + ": " + bids[i] + " ");
-		}
+
 		System.out.println();
 
 		if (winner == agent.id()) {
@@ -119,10 +119,9 @@ public class AuctionAgent implements AuctionBehavior {
 			
 			// Compute the cost of this plan
 			current_cost = 0.0;
-			for(int i = 0; i < agent.vehicles().size(); i++){
-				current_cost += plans.get(i).totalDistance() * agent.vehicles().get(i).costPerKm();
-			}
 			
+			for (int i = 0; i < agent.vehicles().size(); i++)
+				current_cost += plans.get(i).totalDistance() * agent.vehicles().get(i).costPerKm();			
 		}
 		
 		auction_tasks.add(previous);
@@ -132,17 +131,17 @@ public class AuctionAgent implements AuctionBehavior {
 		// Predict the bid factor for all the agents
 		List<Double> distances = getAccumulatedDistances(previous);
 		Double[] latest_bid_factors = new Double[bids.length];
-		for(int i = 0; i < bids.length; i++){
-			if(distances.get(i) == 0){
+		
+		for (int i = 0; i < bids.length; i++) {
+			if (distances.get(i) == 0) {
 				// The agent had not won any tasks yet
 				double distance = previous.pickupCity.distanceTo(previous.deliveryCity);
 				latest_bid_factors[i] = bids[i] / distance;
-			}else{
+			} else
 				latest_bid_factors[i] = bids[i] / distances.get(i);
-			}
 		}
-		bid_factors.add(latest_bid_factors);
 		
+		bid_factors.add(latest_bid_factors);
 	}
 	
 	@Override
@@ -161,38 +160,33 @@ public class AuctionAgent implements AuctionBehavior {
 		double bid = ratio * marginalCost;*/
 		
 		double bid = getBid(task);
-		
 		System.out.println("Task: " + task + ", bid: " + bid);
+		
 		return (long) Math.round(bid);
 	}
 
 	@Override
 	public List<Plan> plan(List<Vehicle> vehicles, TaskSet tasks) {
-		
 		System.out.println("Agent " + agent.id() + " has tasks " + tasks);
-		
 		List<Task> taskList = new ArrayList<Task>();
-		for(Task task : tasks){
+		
+		for (Task task : tasks)
 			taskList.add(task);
-		}
 		
 		List<Plan> plans;
-		if(taskList.size() == 0){
+		if (taskList.size() == 0) {
 			plans = new ArrayList<Plan>();
-			for(int i = 0; i < vehicles.size(); i++){
+			
+			for (int i = 0; i < vehicles.size(); i++)
 				plans.add(Plan.EMPTY);
-			}
-		}else{
+		} else
 			plans = Planning.CSPMultiplePlan(vehicles, taskList, 4, 1000);
-		}
 		
 		double cost = 0.0;
 		
-		if(taskList.size() != 0){
-			for(int i = 0; i < agent.vehicles().size(); i++){
+		if (taskList.size() != 0)
+			for (int i = 0; i < agent.vehicles().size(); i++)
 				cost += plans.get(i).totalDistance() * agent.vehicles().get(i).costPerKm();
-			}
-		}
 
 		double profit = tasks.rewardSum() - cost;
 		System.out.println("Agent " + agent.id() + " | Total profit : " + profit);
@@ -206,11 +200,13 @@ public class AuctionAgent implements AuctionBehavior {
 		double totalFutureCost = 0.0;
 		
 		// Iterate over all the possible next tasks
-		for(City cityFrom : topology.cities()){
-			for(City cityTo : topology.cities()){
-				if(cityTo == cityFrom || distribution.probability(cityFrom, cityTo) < 0.1)
+		for (City cityFrom : topology.cities()) {
+			for (City cityTo : topology.cities()) {
+				if (cityTo == cityFrom || distribution.probability(cityFrom, cityTo) < 0.1)
 					continue;
+				
 				double cost = 0.0;
+				
 				// Create the list of tasks in this speculated plan
 				List<Task> tasks = new ArrayList<Task>();
 				tasks.addAll(won_tasks);
@@ -222,18 +218,18 @@ public class AuctionAgent implements AuctionBehavior {
 				List<Plan> plans = Planning.CSPMultiplePlan(agent.vehicles(), tasks, 2, 500);
 				
 				// Compute the cost of this plan
-				for(int i = 0; i < agent.vehicles().size(); i++){
+				for (int i = 0; i < agent.vehicles().size(); i++)
 					cost += plans.get(i).totalDistance() * agent.vehicles().get(i).costPerKm();
-				}
+				
 				// System.out.println(auctionedTask + " / " + speculatedTask + " cost: " + cost);
 				// Add this cost to the total cost, weighted by the probability that this task will be the next one
 				totalFutureCost += cost * distribution.probability(cityFrom, cityTo) / topology.cities().size();
 				
 				// Check if we are not going overtime
 				long time_now = System.currentTimeMillis();
-				if(time_now - time_start > timeout_bid * 0.8){
+				
+				if (time_now - time_start > timeout_bid * 0.8)
 					return 0;
-				}
 			}
 		}
 		
@@ -307,9 +303,9 @@ public class AuctionAgent implements AuctionBehavior {
 	}
 	
 	private List<Integer> getRankings() {
-		if(auction_winners.size() == 0){
+		if (auction_winners.size() == 0)
 			return null;
-		}
+		
 		List<Integer> ranks = new ArrayList<Integer>();
 		List<Double> totals = getEstimatedTotals();
 		Collections.sort(totals);
@@ -324,11 +320,7 @@ public class AuctionAgent implements AuctionBehavior {
 	private double getRankingFactor() {
 		List<Integer> ranks = getRankings();		
 		
-		if(ranks == null){
-			return 1;
-		}
-		
-		if (ranks.size() < 2)
+		if (ranks == null || ranks.size() < 2)
 			return 1;
 		
 		return ranks.get(agent.id()) * 1.0 / (ranks.size() - 1) / 2 + .75d;
@@ -352,23 +344,24 @@ public class AuctionAgent implements AuctionBehavior {
 	private List<Double> getExpectedBid(Task auctionedTask) {
 		ArrayList<Double> predictedBids = new ArrayList<Double>();
 		List<Double> estimated_distances = getAccumulatedDistances(auctionedTask);
-		if(bid_factors.size() == 0){
+		
+		if (bid_factors.size() == 0)
 			return null;
-		}
-		for(int i = 0; i < bid_factors.get(0).length; i++){
+		
+		for (int i = 0; i < bid_factors.get(0).length; i++) {
 			// Compute the average bid factor for this agent
 			double bid_factor = 0;
-			for(int j = 0; j < bid_factors.size(); j++){
+			
+			for(int j = 0; j < bid_factors.size(); j++)
 				bid_factor += bid_factors.get(j)[i];
-			}
+			
 			bid_factor /= bid_factors.size();
+			
 			// Compute the predicted bid of the agent
-			if(estimated_distances.get(i) == 0){
-				// If there is no distance estimation, take the distance of the auctioned task
-				predictedBids.add(auctionedTask.pickupCity.distanceTo(auctionedTask.deliveryCity) * bid_factor);
-			}else{
+			if (estimated_distances.get(i) == 0)
+				predictedBids.add(auctionedTask.pickupCity.distanceTo(auctionedTask.deliveryCity) * bid_factor); // If there is no distance estimation, take the distance of the auctioned task
+			else
 				predictedBids.add(estimated_distances.get(i) * bid_factor);
-			}
 		}
 		
 		return predictedBids;
@@ -377,6 +370,7 @@ public class AuctionAgent implements AuctionBehavior {
 	// The expected extra cost for us if we take the next task
 	private double getExpectedCost(Task auctionedTask) {
 		double cost = 0.0;
+		
 		// Create a list of all the tasks we would have to deliver if we were to take this task
 		List<Task> tasks = new ArrayList<Task>();
 		tasks.addAll(won_tasks);
@@ -386,9 +380,8 @@ public class AuctionAgent implements AuctionBehavior {
 		List<Plan> plans = Planning.CSPMultiplePlan(agent.vehicles(), tasks, 4, 1000);
 		
 		// Compute the cost of this plan
-		for(int i = 0; i < agent.vehicles().size(); i++){
+		for(int i = 0; i < agent.vehicles().size(); i++)
 			cost += plans.get(i).totalDistance() * agent.vehicles().get(i).costPerKm();
-		}
 		
 		return cost;
 	}
@@ -410,17 +403,19 @@ public class AuctionAgent implements AuctionBehavior {
 		
 		// Get the lowest out of all these bids (except for our own)
 		double expectedBid = 0.0;
+		
 		if (predicted_bids != null) {
-			if(agent.id() == 0){
+			if (agent.id() == 0)
 				expectedBid = predicted_bids.get(1);
-			}else{
+			else
 				expectedBid = predicted_bids.get(0);
-			}
 			
-			for(int i = 1; i< predicted_bids.size(); i++){
-				if(i == agent.id())
+			for (int i = 1; i< predicted_bids.size(); i++) {
+				if (i == agent.id())
 					continue;
+				
 				Double bid = predicted_bids.get(i);
+				
 				if (bid < expectedBid)
 					expectedBid = bid;
 			}				
