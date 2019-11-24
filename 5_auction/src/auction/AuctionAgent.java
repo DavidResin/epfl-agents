@@ -54,7 +54,7 @@ public class AuctionAgent implements AuctionBehavior {
 	// All model parameters
 	private Double profitFactor = 1.5;
 	private Double speculationFactor = 0.0;
-	private Double competitionFactor = 0.0;
+	private Double competitionFactor = 0.1;
 	private Double aggressivenessFactor = 1.0;
 	
 	private List<Plan> plans;
@@ -417,8 +417,10 @@ public class AuctionAgent implements AuctionBehavior {
 		System.out.println("Current cost: " + current_cost);
 		double cost = getExpectedCost(auctionedTask);
 		double expectedCost = cost - current_cost;
-		if(expectedCost < 0)
+		
+		if (expectedCost < 0)
 			expectedCost = 0.0;
+		
 		System.out.println("Expected cost with auctioned task: " + cost + " | difference: " + expectedCost);
 		
 		// Compute the speculated value for the possible next plan
