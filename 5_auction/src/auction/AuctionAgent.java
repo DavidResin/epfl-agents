@@ -433,8 +433,8 @@ public class AuctionAgent implements AuctionBehavior {
         long duration = time_end - time_start;
         System.out.println("The bid was generated in " + duration + " milliseconds.");
 		
-        // double bid = (expectedCost * profitFactor * (1 - speculationFactor - competitionFactor) + expectedFutureCost * speculationFactor * (1 - competitionFactor) + expectedBid * competitionFactor * (1 - speculationFactor)) * (getRankingFactor() * aggressivenessFactor);
-        double bid = expectedCost * profitFactor * (1 - speculationFactor - competitionFactor) + expectedFutureCost * speculationFactor * (1 - competitionFactor) + expectedBid * competitionFactor * (1 - speculationFactor);
+        // double bid = (expectedCost * profitFactor * (1 - speculationFactor - competitionFactor) + expectedFutureCost * speculationFactor + expectedBid * competitionFactor) * (getRankingFactor() * aggressivenessFactor);
+        double bid = expectedCost * profitFactor * (1 - speculationFactor - competitionFactor) + expectedFutureCost * speculationFactor + expectedBid * competitionFactor;
         return bid;
 	}
 }
